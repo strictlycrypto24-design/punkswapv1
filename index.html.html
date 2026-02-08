@@ -3607,17 +3607,23 @@
                 const buyerBuilder = state.keetaClient.initBuilder();
                 buyerBuilder.updateAccounts({ signer: state.keetaAccount, account: state.keetaAccount });
                 
-                buyerBuilder.send(
-                    KeetaNet.lib.Account.fromPublicKeyString(collection.creator),
-                    BigInt(Math.floor(creatorPayment * KTA_DECIMALS)),
-                    state.keetaClient.baseToken
-                );
-                
-                buyerBuilder.send(
-                    KeetaNet.lib.Account.fromPublicKeyString(MARKETPLACE_FEE_WALLET),
-                    BigInt(Math.floor(marketplaceFee * KTA_DECIMALS)),
-                    state.keetaClient.baseToken
-                );
+                // Only send payment if price > 0 (skip for free mints)
+                if (totalPrice > 0) {
+                    console.log("💳 Processing payment...");
+                    buyerBuilder.send(
+                        KeetaNet.lib.Account.fromPublicKeyString(collection.creator),
+                        BigInt(Math.floor(creatorPayment * KTA_DECIMALS)),
+                        state.keetaClient.baseToken
+                    );
+                    
+                    buyerBuilder.send(
+                        KeetaNet.lib.Account.fromPublicKeyString(MARKETPLACE_FEE_WALLET),
+                        BigInt(Math.floor(marketplaceFee * KTA_DECIMALS)),
+                        state.keetaClient.baseToken
+                    );
+                } else {
+                    console.log("🎁 FREE MINT - Skipping payment");
+                }
                 
                 const escrowBuilder = state.escrowClient.initBuilder();
                 escrowBuilder.updateAccounts({ signer: state.escrowAccount, account: state.escrowAccount });
