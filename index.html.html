@@ -1544,14 +1544,12 @@
         import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot, getDocs, query, where, orderBy, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyC7_NPpbitoheYnB4zIGqRXJm4Qce6a3qw",
-            authDomain: "keepunksmkt.firebaseapp.com",
-            databaseURL: "https://keepunksmkt-default-rtdb.firebaseio.com",
-            projectId: "keepunksmkt",
-            storageBucket: "keepunksmkt.firebasestorage.app",
-            messagingSenderId: "322799553100",
-            appId: "1:322799553100:web:3d92d2809b7de4e1f0c2e9",
-            measurementId: "G-GJ2QF7LDVG"
+            apiKey: "AIzaSyBe_G4Es-1UrPx_0unnByq2VsiSEKRj0GU",
+            authDomain: "punkswap-production.firebaseapp.com",
+            projectId: "punkswap-production",
+            storageBucket: "punkswap-production.firebasestorage.app",
+            messagingSenderId: "897835219222",
+            appId: "1:897835219222:web:a65f92db25cd8861d0b837"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -1828,7 +1826,7 @@
                 nft.metadataCache = metadata;
                 
                 if (metadata.attributes && Array.isArray(metadata.attributes)) {
-                    await updateDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', nft.id), {
+                    await updateDoc(doc(db, 'nfts', nft.id), {
                         attributes: metadata.attributes,
                         metadataFetched: true,
                         lastMetadataUpdate: new Date().toISOString()
@@ -2086,7 +2084,7 @@
 
                             // Save to Firebase
                             await setDoc(
-                                doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', nftData.id),
+                                doc(db, 'nfts', nftData.id),
                                 nftData
                             );
 
@@ -2164,7 +2162,7 @@
                 
                 // Save to Firebase
                 await setDoc(
-                    doc(db, 'artifacts', state.appId, 'public', 'data', 'traitCounts', collectionToken),
+                    doc(db, 'traitCounts', collectionToken),
                     traitCounts
                 );
                 
@@ -2204,7 +2202,7 @@
                 };
                 
                 await setDoc(
-                    doc(db, 'artifacts', state.appId, 'public', 'data', 'collections', collectionToken),
+                    doc(db, 'collections', collectionToken),
                     collectionData
                 );
                 
@@ -2521,7 +2519,7 @@
                             
                             // Update Firebase
                             await updateDoc(
-                                doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', existingNFT.id),
+                                doc(db, 'nfts', existingNFT.id),
                                 {
                                     owner: state.address,
                                     inEscrow: false,
@@ -2555,7 +2553,7 @@
                             
                             // Update Firebase - mark as transferred (owner = null or previous owner)
                             await updateDoc(
-                                doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', fbNFT.id),
+                                doc(db, 'nfts', fbNFT.id),
                                 {
                                     owner: null,  // Unknown owner
                                     inEscrow: false,
@@ -2620,7 +2618,7 @@
             try {
                 console.log("📥 Loading NFTs from Firebase...");
                 
-                const nftsRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'nfts');
+                const nftsRef = collection(db, 'nfts');
                 const snapshot = await getDocs(nftsRef);
                 
                 state.nfts = [];
@@ -2692,7 +2690,7 @@
                     }, 300); // Wait 300ms before rendering
                 };
                 
-                const nftsRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'nfts');
+                const nftsRef = collection(db, 'nfts');
                 
                 onSnapshot(nftsRef, 
                     (snapshot) => {
@@ -2724,7 +2722,7 @@
                 );
                 
                 // NEW: Real-time transaction listener for charts
-                const txRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'transactions');
+                const txRef = collection(db, 'transactions');
                 onSnapshot(txRef, 
                     (snapshot) => {
                         console.log("💳 Transaction data updated, refreshing charts...");
@@ -2747,7 +2745,7 @@
                 );
                 
                 // NEW: Real-time collections listener to update blind mint cards
-                const collectionsRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'collections');
+                const collectionsRef = collection(db, 'collections');
                 let lastCollectionUpdate = 0;
                 onSnapshot(collectionsRef, 
                     (snapshot) => {
@@ -2788,7 +2786,7 @@
             if (!traits || traits.length === 0) return;
             
             try {
-                const traitCountsRef = doc(db, 'artifacts', state.appId, 'public', 'data', 'traitCounts', collectionId);
+                const traitCountsRef = doc(db, 'traitCounts', collectionId);
                 const countSnap = await getDoc(traitCountsRef);
                 
                 let counts = countSnap.exists() ? countSnap.data() : {};
@@ -2809,7 +2807,7 @@
             if (!db) return;
             
             try {
-                const countsRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'traitCounts');
+                const countsRef = collection(db, 'traitCounts');
                 const snapshot = await getDocs(countsRef);
                 
                 state.traitCounts = {};
@@ -2828,24 +2826,8 @@
             
             try {
                 // Try primary path first
-                let collectionsRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'collections');
+                let collectionsRef = collection(db, 'collections');
                 let snapshot = await getDocs(collectionsRef);
-                
-                // If empty, try alternate path (direct under artifacts)
-                if (snapshot.empty) {
-                    console.warn("⚠️ No collections at primary path, trying alternate...");
-                    console.log("🔍 Tried:", `artifacts/${state.appId}/public/data/collections`);
-                    
-                    collectionsRef = collection(db, 'collections');
-                    snapshot = await getDocs(collectionsRef);
-                    
-                    if (snapshot.empty) {
-                        console.warn("⚠️ No collections at root /collections either");
-                        console.log("🔍 Tried:", `collections`);
-                    } else {
-                        console.log("✅ Found collections at root /collections path");
-                    }
-                }
                 
                 state.collections = [];
                 snapshot.forEach(doc => {
@@ -3470,7 +3452,7 @@
                 
                 const docId = `nft_${getNormalizedId(collection.collectionToken)}_${mintIndex}`;
                 
-                await setDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', docId), {
+                await setDoc(doc(db, 'nfts', docId), {
                     name: meta.name || `Unit #${mintIndex + 1}`,
                     imageCid: fullImagePath,
                     priceKTA: collection.priceKTA,
@@ -3763,7 +3745,7 @@
                     console.log("⚠️ Shuffle SKIPPED - blind mint not enabled or no files");
                 }
                 
-                await setDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'collections', collectionId), {
+                await setDoc(doc(db, 'collections', collectionId), {
                     collectionId, collectionTitle, collectionName: collectionTitle, collection: collectionTitle,
                     collectionType, collectionToken: colAddr,
                     totalSupply, mintedCount: 0, remainingSupply: totalSupply, ipfsCid: cidVal,
@@ -4674,7 +4656,7 @@
                 window.notify("Creating listing...", "success");
                 
                 // NO ESCROW TRANSFER - Just update Firebase
-                await updateDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', state.listingNFT.id), {
+                await updateDoc(doc(db, 'nfts', state.listingNFT.id), {
                     isListed: true,
                     listedPrice: price,
                     listedCurrency: currency,
@@ -4701,7 +4683,7 @@
                 };
                 
                 await setDoc(
-                    doc(db, 'artifacts', state.appId, 'public', 'data', 'transactions', transactionId),
+                    doc(db, 'transactions', transactionId),
                     transactionData
                 );
                 
@@ -4766,7 +4748,7 @@
                 // Listing uses NO ESCROW - NFT stays with owner. Just update Firebase.
                 window.notify("Canceling listing...", "success");
                 
-                await updateDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', nftId), {
+                await updateDoc(doc(db, 'nfts', nftId), {
                     isListed: false,
                     listedPrice: null,
                     listedCurrency: null,
@@ -4912,7 +4894,7 @@
                 }
                 
                 // Get REAL transaction data from Firebase
-                const txRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'transactions');
+                const txRef = collection(db, 'transactions');
                 let txQuery;
                 
                 if (selectedCollection !== 'all') {
@@ -5307,7 +5289,7 @@
                 console.log(`📦 Collection has ${colNfts.length} total NFTs`);
                 
                 // Get REAL transaction data for this collection
-                const txRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'transactions');
+                const txRef = collection(db, 'transactions');
                 // Match the collectionId format used when recording transactions
                 const colId = `collection_${getNormalizedId(colToken)}`;
                 console.log(`🔍 Searching for transactions with collectionId: ${colId}`);
@@ -5577,7 +5559,7 @@
             
             try {
                 // Step 1: Fetch NFT data
-                const snap = await getDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', nftId));
+                const snap = await getDoc(doc(db, 'nfts', nftId));
                 if (!snap.exists()) return window.notify("NFT not found", "error");
                 
                 const nft = snap.data();
@@ -5664,7 +5646,7 @@
                     txHash = purchaseTxHash;
                     
                     // Update database
-                    await updateDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', nftId), {
+                    await updateDoc(doc(db, 'nfts', nftId), {
                         status: 'transferred',
                         owner: state.address,
                         wasBlindMinted: true,
@@ -5757,7 +5739,7 @@
                     console.log("🔍 Extracted tx hash:", txHash);
                     
                     // Update database
-                    await updateDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', nftId), {
+                    await updateDoc(doc(db, 'nfts', nftId), {
                         status: 'sold',
                         owner: state.address,
                         previousOwner: nft.owner,
@@ -6036,7 +6018,7 @@
         // Load whitelist wallets
         window.loadWhitelistWallets = async (collectionId) => {
             try {
-                const walletsRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'whitelistWallets');
+                const walletsRef = collection(db, 'whitelistWallets');
                 const q = query(walletsRef, where('collectionId', '==', collectionId));
                 const snapshot = await getDocs(q);
                 
@@ -6088,7 +6070,7 @@
                     createdAt: new Date().toISOString()
                 };
                 
-                const walletRef = doc(collection(db, 'artifacts', state.appId, 'public', 'data', 'whitelistWallets'));
+                const walletRef = doc(collection(db, 'whitelistWallets'));
                 await setDoc(walletRef, walletData);
                 
                 // Add to local state
@@ -6203,7 +6185,7 @@
                                     createdAt: new Date().toISOString()
                                 };
                                 
-                                const walletRef = doc(collection(db, 'artifacts', state.appId, 'public', 'data', 'whitelistWallets'));
+                                const walletRef = doc(collection(db, 'whitelistWallets'));
                                 await setDoc(walletRef, walletData);
                                 added++;
                             } else {
@@ -6320,7 +6302,7 @@
                 
                 // Save to Firebase
                 await setDoc(
-                    doc(db, 'artifacts', state.appId, 'public', 'data', 'transactions', transaction.id),
+                    doc(db, 'transactions', transaction.id),
                     transaction
                 );
                 
@@ -6384,7 +6366,7 @@
             try {
                 console.log("📥 Loading transaction history...");
                 
-                const txRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'transactions');
+                const txRef = collection(db, 'transactions');
                 
                 // Try with ordering first
                 let snapshot;
@@ -6724,19 +6706,19 @@
         window.clearAllNFTs = async () => {
             if (!confirm("WARNING: Delete ALL NFTs, Collections, Traits? Continue?")) return;
             try {
-                const nftsRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'nfts');
+                const nftsRef = collection(db, 'nfts');
                 const nftsSnap = await getDocs(nftsRef);
                 for (const document of nftsSnap.docs) await deleteDoc(document.ref);
                 
-                const colRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'collections');
+                const colRef = collection(db, 'collections');
                 const colSnap = await getDocs(colRef);
                 for (const document of colSnap.docs) await deleteDoc(document.ref);
                 
-                const traitRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'traitCounts');
+                const traitRef = collection(db, 'traitCounts');
                 const traitSnap = await getDocs(traitRef);
                 for (const document of traitSnap.docs) await deleteDoc(document.ref);
                 
-                const trackRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'walletMintTracking');
+                const trackRef = collection(db, 'walletMintTracking');
                 const trackSnap = await getDocs(trackRef);
                 for (const document of trackSnap.docs) await deleteDoc(document.ref);
                 
@@ -7114,7 +7096,7 @@
             
             try {
                 // Use atomic increment
-                const collectionRef = doc(db, 'artifacts', state.appId, 'public', 'data', 'collections', collection.collectionId);
+                const collectionRef = doc(db, 'collections', collection.collectionId);
                 
                 await updateDoc(collectionRef, {
                     mintedCount: increment(1),
@@ -7232,7 +7214,7 @@
                 
                 // Save to Firebase
                 const docId = `nft_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                await setDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', docId), {
+                await setDoc(doc(db, 'nfts', docId), {
                     id: docId,
                     tokenId: nftAddr,
                     name: meta.name || `${collection.collectionTitle} #${actualMintIndex + 1}`,
@@ -8125,7 +8107,7 @@
                     offer.collectionId = offerState.currentNFT.collectionId;
                     offer.collectionName = offerState.currentNFT.collection || offerState.currentNFT.collectionTitle;
                 }
-                await setDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'offers', offer.id), offer);
+                await setDoc(doc(db, 'offers', offer.id), offer);
                 window.notify(`✅ Offer submitted: ${amount} ${currency}`, "success");
                 window.closeOfferModal();
                 if (typeof window.loadOffers === 'function') await window.loadOffers();
@@ -8138,7 +8120,7 @@
         window.loadOffers = async () => {
             if (!state.address || !db) return;
             try {
-                const offersRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'offers');
+                const offersRef = collection(db, 'offers');
                 const snapshot = await getDocs(offersRef);
                 state.offers = [];
                 state.myOffers = [];
@@ -8234,7 +8216,7 @@
                 window.notify("Transferring NFT ownership...", "success");
                 
                 // Step 2: Transfer NFT ownership
-                const nftRef = doc(db, 'artifacts', state.appId, 'public', 'data', 'nfts', nft.id);
+                const nftRef = doc(db, 'nfts', nft.id);
                 await updateDoc(nftRef, {
                     owner: buyerWallet,
                     previousOwner: sellerWallet,
@@ -8271,14 +8253,14 @@
                 
                 // Save transaction for seller
                 await setDoc(
-                    doc(db, 'artifacts', state.appId, 'public', 'data', 'transactions', transactionId),
+                    doc(db, 'transactions', transactionId),
                     transactionData
                 );
                 
                 // Save transaction for buyer
                 const buyerTransactionId = `${transactionId}_buyer`;
                 await setDoc(
-                    doc(db, 'artifacts', state.appId, 'public', 'data', 'transactions', buyerTransactionId),
+                    doc(db, 'transactions', buyerTransactionId),
                     {
                         ...transactionData,
                         id: buyerTransactionId,
@@ -8291,7 +8273,7 @@
                 
                 // Step 4: Update offer status
                 await updateDoc(
-                    doc(db, 'artifacts', state.appId, 'public', 'data', 'offers', offerId),
+                    doc(db, 'offers', offerId),
                     {
                         status: 'accepted',
                         acceptedAt: new Date().toISOString(),
@@ -8337,7 +8319,7 @@
             const offer = state.offers.find(o => o.id === offerId);
             if (!offer || offer.offerer.toLowerCase() !== state.address.toLowerCase()) return window.notify("Can only cancel your own offers", "error");
             try {
-                await updateDoc(doc(db, 'artifacts', state.appId, 'public', 'data', 'offers', offerId), { status: 'cancelled', cancelledAt: new Date().toISOString() });
+                await updateDoc(doc(db, 'offers', offerId), { status: 'cancelled', cancelledAt: new Date().toISOString() });
                 window.notify("Offer cancelled", "success");
                 await window.loadOffers();
             } catch (error) {
