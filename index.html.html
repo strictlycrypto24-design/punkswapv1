@@ -1564,7 +1564,7 @@
             try {
                 const userCredential = await signInAnonymously(auth);
                 console.log("✅ Firebase Auth: CONNECTED");
-                const testDocRef = doc(db, 'artifacts', state.appId, 'test', 'connection');
+                const testDocRef = doc(db, 'test', 'connection');
                 await setDoc(testDocRef, {
                     timestamp: new Date().toISOString(),
                     status: 'connected',
@@ -2257,9 +2257,14 @@
 
         window.refreshAuthGate = () => {
             const hasAuth = !!state.address;
+            const isEscrowWallet = state.address === MARKETPLACE_FEE_WALLET;
+            
             document.getElementById('adminGate')?.classList.toggle('hidden', hasAuth);
             document.getElementById('forgeContainer')?.classList.toggle('hidden', !hasAuth);
-            document.getElementById('uiWipePanel')?.classList.toggle('hidden', !hasAuth);
+            
+            // UI Reset Panel - ONLY show for escrow wallet
+            document.getElementById('uiWipePanel')?.classList.toggle('hidden', !isEscrowWallet);
+            
             document.getElementById('vaultGate')?.classList.toggle('hidden', hasAuth);
             document.getElementById('vaultContainer')?.classList.toggle('hidden', !hasAuth);
             document.getElementById('watchlistGate')?.classList.toggle('hidden', hasAuth);
@@ -2269,8 +2274,8 @@
             document.getElementById('offersGate')?.classList.toggle('hidden', hasAuth);
             document.getElementById('offersContainer')?.classList.toggle('hidden', !hasAuth);
             
-            // Update cached items display when showing admin panel
-            if (hasAuth) {
+            // Update cached items display when showing admin panel (escrow wallet only)
+            if (isEscrowWallet) {
                 setTimeout(() => window.updateCachedItemsDisplay(), 100);
             }
         };
