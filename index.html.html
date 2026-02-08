@@ -1015,6 +1015,61 @@
             <!-- Admin/Forge Hub -->
             <section id="tab-admin" class="tab-content animate-view hidden space-y-8">
                 <div id="adminGate" class="auth-gate glass-card p-16 text-center border-cyan-500/10"><h2 class="orbitron text-2xl font-black uppercase text-cyan-400 mb-4 italic">Administrative Check</h2><button onclick="window.initNeuralLink()" class="btn-primary px-12">Initialize Sign-In</button></div>
+                
+                <!-- UI WIPE & RELOAD PANEL -->
+                <div id="uiWipePanel" class="hidden glass-card p-8 space-y-6 border-red-500/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="orbitron text-xl text-red-400 uppercase font-black italic">⚠️ UI Reset Panel</h3>
+                            <p class="fira text-xs text-gray-500 mt-2">Force sync UI with database (use after database wipe)</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="orbitron text-xs text-gray-500 uppercase">Cached Items</div>
+                            <div class="orbitron text-2xl text-cyan-400 font-black" id="cachedItemsCount">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-black/40 p-4 rounded-lg border border-white/5 text-center">
+                            <div class="orbitron text-xs text-gray-500 uppercase mb-2">NFTs</div>
+                            <div class="text-2xl text-white font-bold" id="cachedNFTsCount">0</div>
+                        </div>
+                        <div class="bg-black/40 p-4 rounded-lg border border-white/5 text-center">
+                            <div class="orbitron text-xs text-gray-500 uppercase mb-2">Collections</div>
+                            <div class="text-2xl text-white font-bold" id="cachedCollectionsCount">0</div>
+                        </div>
+                        <div class="bg-black/40 p-4 rounded-lg border border-white/5 text-center">
+                            <div class="orbitron text-xs text-gray-500 uppercase mb-2">Transactions</div>
+                            <div class="text-2xl text-white font-bold" id="cachedTransactionsCount">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-yellow-500 text-xl">⚠️</span>
+                            <div class="fira text-xs text-yellow-200">
+                                <p class="font-bold mb-1">Warning: This will clear all cached UI data</p>
+                                <p>Use this when you've wiped the database and need to force the UI to reload fresh data. All Firestore listeners will be reset.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="window.wipeUIAndReload(false)" class="flex-1 p-4 rounded-lg border-2 border-cyan-500/30 text-cyan-400 orbitron text-sm font-bold uppercase hover:bg-cyan-500/10 transition-all">
+                            🔄 Soft Reload
+                        </button>
+                        <button onclick="window.wipeUIAndReload(true)" class="flex-1 p-4 rounded-lg border-2 border-red-500 text-red-400 orbitron text-sm font-bold uppercase hover:bg-red-500/10 transition-all">
+                            💥 Hard Wipe & Reload
+                        </button>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button onclick="window.hardRefreshPage()" class="text-xs orbitron text-gray-500 uppercase hover:text-white transition-colors">
+                            Or click here for full page refresh (F5)
+                        </button>
+                    </div>
+                </div>
+                
                 <div id="forgeContainer" class="hidden space-y-10">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
                         <div class="lg:col-span-2 glass-card p-12 space-y-10">
@@ -2197,6 +2252,7 @@
             const hasAuth = !!state.address;
             document.getElementById('adminGate')?.classList.toggle('hidden', hasAuth);
             document.getElementById('forgeContainer')?.classList.toggle('hidden', !hasAuth);
+            document.getElementById('uiWipePanel')?.classList.toggle('hidden', !hasAuth);
             document.getElementById('vaultGate')?.classList.toggle('hidden', hasAuth);
             document.getElementById('vaultContainer')?.classList.toggle('hidden', !hasAuth);
             document.getElementById('watchlistGate')?.classList.toggle('hidden', hasAuth);
@@ -2205,6 +2261,11 @@
             document.getElementById('transactionsContainer')?.classList.toggle('hidden', !hasAuth);
             document.getElementById('offersGate')?.classList.toggle('hidden', hasAuth);
             document.getElementById('offersContainer')?.classList.toggle('hidden', !hasAuth);
+            
+            // Update cached items display when showing admin panel
+            if (hasAuth) {
+                setTimeout(() => window.updateCachedItemsDisplay(), 100);
+            }
         };
 
         window.initNeuralLink = () => {
@@ -3133,11 +3194,18 @@
                     const mintPromise = (async () => {
                         console.log(`🎨 Starting mint ${mintNum}/${quantity}`);
                         try {
-                            await window.mintFromCollection(collectionId);
-                            successCount++;
-                            console.log(`✅ Mint ${mintNum} SUCCESS`);
+                            const result = await window.mintFromCollection(collectionId);
+                            
+                            // Check if mint actually succeeded
+                            if (result && result.success) {
+                                successCount++;
+                                console.log(`✅ Mint ${mintNum} SUCCESS`);
+                            } else {
+                                failedCount++;
+                                console.error(`❌ Mint ${mintNum} FAILED:`, result?.error || 'Unknown error');
+                            }
                         } catch (error) {
-                            console.error(`❌ Mint ${mintNum} failed:`, error);
+                            console.error(`❌ Mint ${mintNum} exception:`, error);
                             failedCount++;
                         }
                     })();
@@ -3544,7 +3612,7 @@
                         <p class="fira text-xs text-gray-500 mt-1">${col.collectionDesc}</p>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="fira text-sm text-white font-bold">${col.priceKTA} KTA</span>
+                        <span class="fira text-sm font-bold ${col.priceKTA === 0 ? 'text-green-400' : 'text-white'}">${col.priceKTA === 0 ? 'FREE' : `${col.priceKTA} KTA`}</span>
                         <span class="fira text-xs text-orange-400">Remaining: ${col.remainingSupply}/${col.totalSupply}</span>
                     </div>
                     
@@ -4582,6 +4650,32 @@
                     listedCurrency: currency,
                     listedAt: new Date().toISOString()
                 });
+                
+                // Create transaction record for listing
+                const transactionId = `tx_listing_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const transactionData = {
+                    id: transactionId,
+                    type: 'listing',
+                    nftId: state.listingNFT.id,
+                    nftName: state.listingNFT.name,
+                    nftImage: state.listingNFT.imagePath || state.listingNFT.imageCid,
+                    collectionId: state.listingNFT.collectionId || state.listingNFT.collection,
+                    collectionName: state.listingNFT.collectionName || state.listingNFT.collectionTitle,
+                    price: price,
+                    currency: currency,
+                    seller: state.address,
+                    wallet: state.address, // For seller's transaction history
+                    timestamp: new Date().toISOString(),
+                    txHash: `listing_${state.listingNFT.id}`,
+                    status: 'listed'
+                };
+                
+                await setDoc(
+                    doc(db, 'artifacts', state.appId, 'public', 'data', 'transactions', transactionId),
+                    transactionData
+                );
+                
+                console.log("✅ Transaction record created for listing");
                 
                 window.notify(`✅ Listed for ${price} ${currency}!`, "success");
                 window.closeListingModal();
@@ -7505,9 +7599,16 @@
                 }
                 const gateways = ['https://ipfs.io/ipfs', 'https://gateway.pinata.cloud/ipfs', 'https://cloudflare-ipfs.com/ipfs'];
                 let metadata = null;
-                // Clean CID and filename to prevent double slashes
-                const cleanCid = collection.ipfsCid.replace(/^\/+|\/+$/g, '');
+                // Clean CID and filename to prevent double slashes and remove ipfs:// protocol
+                let cleanCid = collection.ipfsCid || '';
+                // Remove ipfs:// protocol prefix if present
+                if (cleanCid.startsWith('ipfs://')) {
+                    cleanCid = cleanCid.replace('ipfs://', '');
+                }
+                // Remove leading/trailing slashes
+                cleanCid = cleanCid.replace(/^\/+|\/+$/g, '');
                 const cleanFilename = filename.replace(/^\/+/g, '');
+                
                 for (const gw of gateways) {
                     try {
                         const metaUrl = `${gw}/${cleanCid}/${cleanFilename}`;
@@ -7614,21 +7715,37 @@
 
             async executePayment(req, collection) {
                 console.log("💰 [STEP 4] Processing payment...");
+                
+                const price = collection.priceKTA || 0;
+                
+                // Handle FREE mints (0 KTA) - skip payment
+                if (price === 0) {
+                    console.log("✅ [STEP 4] FREE MINT - No payment required (0 KTA)");
+                    return 'free_mint_no_payment';
+                }
+                
+                // Process paid mints
                 const account = req.userClient?.account || req.userAccount;
                 if (!account) throw new Error("userClient.account or userAccount required");
+                
                 const paymentBuilder = req.userClient.initBuilder();
                 paymentBuilder.updateAccounts({ signer: account, account });
+                
                 const keetaToken = req.userClient?.baseToken || KeetaNet.lib.Account.fromPublicKeyString('keeta_anyiff4v34alvumupagmdyosydeq24lc4def5mrpmmyhx3j6vj2uucckeqn52');
-                const price = collection.priceKTA;
+                
                 const creatorShare = price * PRIMARY_SALE_CREATOR_PERCENT;
                 const marketplaceShare = price * PRIMARY_SALE_MARKETPLACE_PERCENT;
+                
                 const creatorAccount = KeetaNet.lib.Account.fromPublicKeyString(collection.creator || collection.creatorWallet);
                 paymentBuilder.send(creatorAccount, BigInt(Math.floor(creatorShare * KTA_DECIMALS)), keetaToken);
+                
                 const marketplaceAccount = KeetaNet.lib.Account.fromPublicKeyString(MARKETPLACE_FEE_WALLET);
                 paymentBuilder.send(marketplaceAccount, BigInt(Math.floor(marketplaceShare * KTA_DECIMALS)), keetaToken);
+                
                 await req.userClient.computeBuilderBlocks(paymentBuilder);
                 const paymentTx = await req.userClient.publishBuilder(paymentBuilder);
                 const txHash = paymentTx?.voteStaple?.blocks?.[0]?.$hash || this.extractHashFromTx(paymentTx);
+                
                 console.log("✅ [STEP 4] Payment complete, tx:", txHash);
                 return txHash;
             }
@@ -8142,16 +8259,112 @@
             }
         };
 
+        // ═══════════════════════════════════════════════════════════════════
+        // UI WIPE & RELOAD FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════
+        
+        window.updateCachedItemsDisplay = () => {
+            const nftsCount = document.getElementById('cachedNFTsCount');
+            const collectionsCount = document.getElementById('cachedCollectionsCount');
+            const transactionsCount = document.getElementById('cachedTransactionsCount');
+            const totalCount = document.getElementById('cachedItemsCount');
+            
+            if (nftsCount) nftsCount.textContent = state.nfts?.length || 0;
+            if (collectionsCount) collectionsCount.textContent = state.collections?.length || 0;
+            if (transactionsCount) transactionsCount.textContent = state.transactions?.length || 0;
+            if (totalCount) {
+                const total = (state.nfts?.length || 0) + (state.collections?.length || 0) + (state.transactions?.length || 0);
+                totalCount.textContent = total;
+            }
+        };
+        
+        window.wipeUIAndReload = async (hardWipe = false) => {
+            const confirmMsg = hardWipe 
+                ? "⚠️ HARD WIPE: This will clear ALL cached data and force a complete reload. Continue?"
+                : "🔄 SOFT RELOAD: This will refresh data from database. Continue?";
+            
+            if (!confirm(confirmMsg)) return;
+            
+            try {
+                console.log(`🔥 ${hardWipe ? 'HARD' : 'SOFT'} WIPE INITIATED`);
+                window.notify(`${hardWipe ? '💥' : '🔄'} Wiping UI cache...`, "success");
+                
+                if (hardWipe) {
+                    // HARD WIPE: Clear everything
+                    console.log("💥 Clearing all state...");
+                    
+                    // Clear all state arrays
+                    state.nfts = [];
+                    state.collections = [];
+                    state.transactions = [];
+                    state.allTransactions = [];
+                    state.offers = [];
+                    state.offersOnMyNFTs = [];
+                    state.myOffers = [];
+                    state.traitCounts = {};
+                    state.viewingCollection = null;
+                    
+                    // Clear session storage
+                    try {
+                        sessionStorage.clear();
+                        console.log("✅ Session storage cleared");
+                    } catch (e) {
+                        console.warn("⚠️ Could not clear session storage:", e);
+                    }
+                    
+                    // Clear any chart data
+                    if (window.currentChart) {
+                        window.currentChart.destroy();
+                        window.currentChart = null;
+                    }
+                    
+                    console.log("✅ State wiped clean");
+                }
+                
+                // Force reload all data from Firebase
+                window.notify("📥 Loading fresh data from database...", "success");
+                console.log("📥 Loading fresh data from Firebase...");
+                
+                await window.loadNFTsFromFirebase();
+                await window.loadCollections();
+                await window.loadTraitCounts();
+                
+                if (state.address) {
+                    await window.loadTransactions();
+                    await window.loadOffers();
+                }
+                
+                // Re-render all views
+                window.notify("🎨 Refreshing all views...", "success");
+                console.log("🎨 Re-rendering all views...");
+                
+                window.renderMarketplace();
+                window.renderDrops();
+                window.renderCollection();
+                window.populateChartSelector();
+                await window.initFloorPulseChart();
+                
+                // Update the cached items display
+                window.updateCachedItemsDisplay();
+                
+                console.log("✅ UI WIPE COMPLETE!");
+                window.notify(`✅ ${hardWipe ? 'Hard wipe' : 'Soft reload'} complete! UI synced with database.`, "success");
+                
+            } catch (error) {
+                console.error("❌ Error during wipe:", error);
+                window.notify("❌ Wipe failed: " + error.message, "error");
+            }
+        };
+        
+        window.hardRefreshPage = () => {
+            if (confirm("🔄 This will refresh the entire page (like pressing F5). Continue?")) {
+                window.location.reload(true);
+            }
+        };
+        
         window.forceReload = async () => {
-            console.log("🔄 FORCE RELOAD TRIGGERED");
-            await window.loadNFTsFromFirebase();
-            await window.loadCollections();
-            await window.loadTraitCounts();
-            window.renderMarketplace();
-            window.renderDrops();
-            window.populateChartSelector();
-            await window.initFloorPulseChart();
-            window.notify("Data reloaded!", "success");
+            // Legacy function - redirect to new wipe function
+            await window.wipeUIAndReload(false);
         };
 
         // Call initialization when DOM is ready
