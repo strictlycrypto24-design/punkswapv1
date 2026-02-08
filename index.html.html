@@ -615,6 +615,10 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Offers
                 </div>
+                <div id="nav-activity" onclick="window.switchTab('activity')" class="nav-item">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    Activity Feed
+                </div>
             </nav>
 
             <div class="sidebar-section-label">Protocols</div>
@@ -1012,6 +1016,26 @@
                 </div>
             </section>
 
+            <!-- ACTIVITY FEED PAGE -->
+            <section id="tab-activity" class="tab-content animate-view hidden space-y-8">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="orbitron text-4xl font-black uppercase italic text-cyan-400">Activity Feed</h2>
+                        <div class="text-xs orbitron text-gray-500 uppercase">Live • Last 24 hours</div>
+                    </div>
+                    <p class="fira text-sm text-gray-400">Real-time marketplace activity</p>
+                </div>
+                
+                <div class="glass-card p-8 space-y-4">
+                    <div id="activityFeedContainer" class="space-y-2">
+                        <!-- Activity items render here -->
+                        <div class="text-center py-12 text-gray-500 fira text-sm">
+                            Loading activity...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Admin/Forge Hub -->
             <section id="tab-admin" class="tab-content animate-view hidden space-y-8">
                 <div id="adminGate" class="auth-gate glass-card p-16 text-center border-cyan-500/10"><h2 class="orbitron text-2xl font-black uppercase text-cyan-400 mb-4 italic">Administrative Check</h2><button onclick="window.initNeuralLink()" class="btn-primary px-12">Initialize Sign-In</button></div>
@@ -1258,6 +1282,25 @@
                                     <div>
                                         <label class="block text-[9px] orbitron text-gray-500 uppercase font-black mb-2">Default Max Mints per Wallet</label>
                                         <input type="number" id="whitelistDefaultMax" value="1" min="1" max="10" class="w-full bg-black/60 border border-purple-500/30 rounded-lg px-4 py-3 text-white fira text-sm outline-none">
+                                    </div>
+                                    
+                                    <!-- WHITELIST PHASES WITH CUSTOM PRICING -->
+                                    <div class="bg-gradient-to-br from-purple-900/20 to-pink-900/20 p-6 rounded-xl border border-purple-500/30 space-y-4">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="orbitron text-[9px] text-purple-400 uppercase font-black">Whitelist Phases (Custom Pricing)</h5>
+                                            <button onclick="window.addWhitelistPhase()" class="text-xs px-3 py-1 rounded bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-all orbitron font-bold">+ Add Phase</button>
+                                        </div>
+                                        <p class="fira text-[10px] text-gray-500">Create multiple whitelist phases with different pricing per phase</p>
+                                        
+                                        <div id="whitelistPhasesContainer" class="space-y-3">
+                                            <!-- Phases will be added here -->
+                                        </div>
+                                        
+                                        <div class="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-3">
+                                            <p class="fira text-[9px] text-cyan-300">
+                                                💡 <strong>Example:</strong> Phase 1 (OG): 0.5 KTA | Phase 2 (Early): 1 KTA | Phase 3 (Public): 2 KTA
+                                            </p>
+                                        </div>
                                     </div>
                                     
                                     <!-- Manual Entry -->
@@ -1709,6 +1752,8 @@
             } else if (tabName === 'offers' && state.address) {
                 window.loadOffers();
                 window.renderOffers();
+            } else if (tabName === 'activity') {
+                window.renderActivityFeed();
             }
         };
 
@@ -1749,6 +1794,16 @@
                 log.scrollTop = log.scrollHeight;
             }
             console.log(msg);
+        };
+
+        // NOTIFICATION SYSTEM
+        // ═══════════════════════════════════════════════════════════════════
+        window.notify = (msg, type = "success") => {
+            const n = document.createElement('div');
+            n.className = `fixed bottom-10 right-10 p-8 glass-card border-l-[10px] ${type==='success'?'border-cyan-500 text-cyan-400':'border-red-500 text-red-500'} z-[5000] orbitron text-[10px] font-black uppercase animate-view shadow-2xl`;
+            n.innerText = msg;
+            document.body.appendChild(n);
+            setTimeout(() => n.remove(), 4000);
         };
 
         window.updateStats = () => { 
@@ -2619,6 +2674,147 @@
         
 
 
+        // RARITY SCORING SYSTEM
+        // ═══════════════════════════════════════════════════════════════════
+        
+        window.calculateRarityScore = (nft, allNFTsInCollection) => {
+            if (!nft.attributes || !Array.isArray(nft.attributes)) {
+                return { score: 0, rank: null, percentile: 0 };
+            }
+            
+            const collectionSize = allNFTsInCollection.length;
+            if (collectionSize === 0) return { score: 0, rank: null, percentile: 0 };
+            
+            let totalScore = 0;
+            const traitScores = [];
+            
+            // Calculate score for each trait
+            for (const trait of nft.attributes) {
+                const traitType = trait.trait_type;
+                const traitValue = trait.value;
+                
+                // Count how many NFTs have this exact trait
+                const countWithTrait = allNFTsInCollection.filter(n => {
+                    if (!n.attributes) return false;
+                    return n.attributes.some(a => 
+                        a.trait_type === traitType && a.value === traitValue
+                    );
+                }).length;
+                
+                // Rarity formula: 1 / (frequency / total)
+                const frequency = countWithTrait / collectionSize;
+                const traitScore = frequency > 0 ? (1 / frequency) : 0;
+                
+                traitScores.push({
+                    trait_type: traitType,
+                    value: traitValue,
+                    count: countWithTrait,
+                    frequency: (frequency * 100).toFixed(1) + '%',
+                    score: traitScore
+                });
+                
+                totalScore += traitScore;
+            }
+            
+            // Calculate rank
+            const allScores = allNFTsInCollection.map(n => {
+                if (!n.attributes) return 0;
+                let score = 0;
+                for (const trait of n.attributes) {
+                    const countWithTrait = allNFTsInCollection.filter(x => 
+                        x.attributes && x.attributes.some(a => 
+                            a.trait_type === trait.trait_type && a.value === trait.value
+                        )
+                    ).length;
+                    const freq = countWithTrait / collectionSize;
+                    score += freq > 0 ? (1 / freq) : 0;
+                }
+                return score;
+            }).sort((a, b) => b - a); // Descending order
+            
+            const rank = allScores.indexOf(totalScore) + 1;
+            const percentile = ((collectionSize - rank) / collectionSize * 100).toFixed(1);
+            
+            return {
+                score: totalScore,
+                rank: rank,
+                total: collectionSize,
+                percentile: parseFloat(percentile),
+                traitScores: traitScores,
+                formattedScore: totalScore.toFixed(2)
+            };
+        };
+        
+        window.addRarityToNFTs = () => {
+            console.log("🎲 Calculating rarity scores...");
+            
+            // Group NFTs by collection
+            const byCollection = {};
+            for (const nft of state.nfts) {
+                const colId = nft.collectionId || nft.collectionToken;
+                if (!colId) continue;
+                if (!byCollection[colId]) byCollection[colId] = [];
+                byCollection[colId].push(nft);
+            }
+            
+            // Calculate rarity for each NFT
+            let calculated = 0;
+            for (const [colId, nfts] of Object.entries(byCollection)) {
+                for (const nft of nfts) {
+                    const rarity = window.calculateRarityScore(nft, nfts);
+                    nft.rarity = rarity;
+                    calculated++;
+                }
+            }
+            
+            console.log(`✅ Calculated rarity for ${calculated} NFTs across ${Object.keys(byCollection).length} collections`);
+            return calculated;
+        };
+        
+        window.getRarityBadgeHTML = (rarity) => {
+            if (!rarity || !rarity.rank) return '';
+            
+            let badgeColor = 'gray';
+            let badgeText = 'Common';
+            
+            // Percentile-based rarity tiers
+            if (rarity.percentile >= 95) {
+                badgeColor = 'from-yellow-400 to-orange-500';
+                badgeText = 'Legendary';
+            } else if (rarity.percentile >= 85) {
+                badgeColor = 'from-purple-500 to-pink-500';
+                badgeText = 'Epic';
+            } else if (rarity.percentile >= 70) {
+                badgeColor = 'from-blue-500 to-cyan-500';
+                badgeText = 'Rare';
+            } else if (rarity.percentile >= 50) {
+                badgeColor = 'from-green-500 to-emerald-500';
+                badgeText = 'Uncommon';
+            } else {
+                badgeColor = 'from-gray-600 to-gray-700';
+                badgeText = 'Common';
+            }
+            
+            return `
+                <div class="absolute top-2 left-2 z-10">
+                    <div class="bg-gradient-to-r ${badgeColor} px-2 py-1 rounded text-[8px] orbitron font-black text-white shadow-lg">
+                        #${rarity.rank} / ${rarity.total}
+                    </div>
+                    <div class="bg-black/80 mt-1 px-2 py-0.5 rounded text-[7px] fira text-white">
+                        ${badgeText}
+                    </div>
+                </div>
+            `;
+        };
+        
+        window.sortNFTsByRarity = (nfts, order = 'desc') => {
+            return [...nfts].sort((a, b) => {
+                const scoreA = a.rarity?.score || 0;
+                const scoreB = b.rarity?.score || 0;
+                return order === 'desc' ? scoreB - scoreA : scoreA - scoreB;
+            });
+        };
+
         window.loadNFTsFromFirebase = async () => {
             try {
                 console.log("📥 Loading NFTs from Firebase...");
@@ -2639,6 +2835,10 @@
                 if (state.nfts.length > 0) {
                     console.log("📦 Sample NFT:", state.nfts[0]);
                     console.log("📦 First NFT keys:", Object.keys(state.nfts[0]));
+                    
+                    // 🎲 Calculate rarity scores for all NFTs
+                    const rarityCount = window.addRarityToNFTs();
+                    console.log(`🎲 Calculated rarity for ${rarityCount} NFTs`);
                 } else {
                     console.warn("⚠️ Query returned 0 NFTs - checking Firebase path...");
                     console.log("🔍 Expected path:", `artifacts/${state.appId}/public/data/nfts`);
@@ -2659,6 +2859,120 @@
                 window.notify("Error loading marketplace data", "error");
                 return [];
             }
+        };
+
+        // ACTIVITY FEED - Real-time marketplace activity
+        // ═══════════════════════════════════════════════════════════════════
+        
+        window.initActivityFeed = () => {
+            console.log("📰 Initializing activity feed...");
+            
+            // Listen to transactions collection for real-time updates
+            const txQuery = query(
+                collection(db, 'transactions'),
+                orderBy('timestamp', 'desc'),
+                limit(50)
+            );
+            
+            onSnapshot(txQuery, (snapshot) => {
+                console.log("📰 Activity feed updated");
+                window.renderActivityFeed();
+            });
+        };
+        
+        window.renderActivityFeed = () => {
+            const container = document.getElementById('activityFeedContainer');
+            if (!container) return;
+            
+            // Get recent transactions (last 24 hours)
+            const now = Date.now();
+            const oneDayAgo = now - (24 * 60 * 60 * 1000);
+            
+            const recentActivity = state.transactions
+                .filter(tx => {
+                    const txTime = new Date(tx.timestamp).getTime();
+                    return txTime > oneDayAgo;
+                })
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                .slice(0, 20);
+            
+            if (recentActivity.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500 fira text-sm">
+                        No recent activity
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = recentActivity.map(tx => {
+                const timeAgo = window.getTimeAgo(tx.timestamp);
+                const nft = state.nfts.find(n => n.id === tx.nftId || n.tokenId === tx.nftId);
+                const nftName = nft?.name || 'Unknown NFT';
+                const collection = state.collections.find(c => c.collectionId === nft?.collectionId);
+                const collectionName = collection?.collectionTitle || 'Unknown Collection';
+                
+                let icon = '💰';
+                let action = '';
+                let color = 'text-cyan-400';
+                
+                if (tx.type === 'mint' || tx.type === 'MINT') {
+                    icon = '🎨';
+                    action = 'minted';
+                    color = 'text-green-400';
+                } else if (tx.type === 'sale' || tx.type === 'SALE') {
+                    icon = '💎';
+                    action = 'bought';
+                    color = 'text-cyan-400';
+                } else if (tx.type === 'list' || tx.type === 'LIST') {
+                    icon = '📋';
+                    action = 'listed';
+                    color = 'text-purple-400';
+                } else if (tx.type === 'offer' || tx.type === 'OFFER') {
+                    icon = '💰';
+                    action = 'offered on';
+                    color = 'text-yellow-400';
+                }
+                
+                const buyerShort = tx.buyer ? tx.buyer.substring(0, 6) + '...' + tx.buyer.substring(tx.buyer.length - 4) : 'Someone';
+                
+                return `
+                    <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all group cursor-pointer border border-white/5 hover:border-cyan-500/30">
+                        <div class="text-2xl">${icon}</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="fira text-xs ${color}">
+                                <span class="font-bold">${buyerShort}</span>
+                                <span class="text-gray-400"> ${action} </span>
+                                <span class="font-bold text-white truncate">${nftName}</span>
+                            </div>
+                            <div class="fira text-[10px] text-gray-600 mt-0.5">
+                                ${collectionName} • ${timeAgo}
+                            </div>
+                        </div>
+                        ${tx.price ? `
+                            <div class="orbitron text-xs font-bold ${color}">
+                                ${tx.price} ${tx.currency || 'KTA'}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        };
+        
+        window.getTimeAgo = (timestamp) => {
+            const now = Date.now();
+            const then = new Date(timestamp).getTime();
+            const diff = now - then;
+            
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (days > 0) return `${days}d ago`;
+            if (hours > 0) return `${hours}h ago`;
+            if (minutes > 0) return `${minutes}m ago`;
+            return 'just now';
         };
 
         // FIX #1: Enrich NFTs with missing metadata
@@ -3267,7 +3581,17 @@
             try {
                 console.log("⚛️ Creating atomic swap...");
                 
-                const totalPrice = collection.priceKTA;
+                // Check for phase-based pricing
+                let totalPrice = collection.priceKTA;
+                const activePhase = window.getActivePhaseForWallet(collection.collectionId, state.address);
+                
+                if (activePhase) {
+                    totalPrice = activePhase.priceKTA;
+                    console.log(`💎 Phase pricing active: "${activePhase.name}" = ${totalPrice} KTA`);
+                } else {
+                    console.log(`💰 Standard pricing: ${totalPrice} KTA`);
+                }
+                
                 const marketplaceFee = totalPrice * PRIMARY_SALE_MARKETPLACE_PERCENT;
                 const creatorPayment = totalPrice * PRIMARY_SALE_CREATOR_PERCENT;
                 
@@ -3629,7 +3953,16 @@
                         <p class="fira text-xs text-gray-500 mt-1">${col.collectionDesc}</p>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="fira text-sm font-bold ${col.priceKTA === 0 ? 'text-green-400' : 'text-white'}">${col.priceKTA === 0 ? 'FREE' : `${col.priceKTA} KTA`}</span>
+                        <span class="fira text-sm font-bold ${(() => {
+                            const activePhase = state.address ? window.getActivePhaseForWallet(col.collectionId, state.address) : null;
+                            const price = activePhase ? activePhase.priceKTA : col.priceKTA;
+                            return price === 0 ? 'text-green-400' : 'text-white';
+                        })()}">${(() => {
+                            const activePhase = state.address ? window.getActivePhaseForWallet(col.collectionId, state.address) : null;
+                            const price = activePhase ? activePhase.priceKTA : col.priceKTA;
+                            const phaseName = activePhase ? ` (${activePhase.name})` : '';
+                            return price === 0 ? 'FREE' : `${price} KTA${phaseName}`;
+                        })()}</span>
                         <span class="fira text-xs text-orange-400">Remaining: ${col.remainingSupply}/${col.totalSupply}</span>
                     </div>
                     
@@ -5986,7 +6319,7 @@
         // Load whitelist settings for collection
         window.loadWhitelistSettings = async (collectionId) => {
             try {
-                const settingsRef = doc(db, 'artifacts', state.appId, 'public', 'data', 'whitelistSettings', collectionId);
+                const settingsRef = doc(db, 'whitelistSettings', collectionId);
                 const snap = await getDoc(settingsRef);
                 
                 if (snap.exists()) {
@@ -6005,6 +6338,12 @@
                     if (data.mintWindowEnd) {
                         const end = new Date(data.mintWindowEnd);
                         document.getElementById('whitelistEnd').value = end.toISOString().slice(0, 16);
+                    }
+                    
+                    // Load phases
+                    if (data.phases && Array.isArray(data.phases)) {
+                        window.whitelistPhases = data.phases;
+                        window.renderWhitelistPhases();
                     }
                     
                     window.toggleWhitelistSettingsUI?.();
@@ -6250,6 +6589,132 @@
         };
         
         // Save whitelist settings
+        // WHITELIST PHASES WITH CUSTOM PRICING
+        // ═══════════════════════════════════════════════════════════════════
+        
+        window.whitelistPhases = [];
+        
+        window.addWhitelistPhase = () => {
+            const phaseNumber = window.whitelistPhases.length + 1;
+            const phaseId = `phase_${Date.now()}`;
+            
+            const phase = {
+                id: phaseId,
+                name: `Phase ${phaseNumber}`,
+                priceKTA: 1,
+                startTime: null,
+                endTime: null,
+                maxMintsPerWallet: 1,
+                wallets: []
+            };
+            
+            window.whitelistPhases.push(phase);
+            window.renderWhitelistPhases();
+        };
+        
+        window.removeWhitelistPhase = (phaseId) => {
+            window.whitelistPhases = window.whitelistPhases.filter(p => p.id !== phaseId);
+            window.renderWhitelistPhases();
+        };
+        
+        window.renderWhitelistPhases = () => {
+            const container = document.getElementById('whitelistPhasesContainer');
+            if (!container) return;
+            
+            if (window.whitelistPhases.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-gray-600 fira text-xs">
+                        No phases added yet. Click "+ Add Phase" to create one.
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = window.whitelistPhases.map((phase, index) => `
+                <div class="bg-black/40 p-4 rounded-lg border border-purple-500/20 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <input type="text" value="${phase.name}" 
+                               onchange="window.whitelistPhases[${index}].name = this.value"
+                               class="bg-transparent text-purple-400 orbitron text-sm font-bold outline-none">
+                        <button onclick="window.removeWhitelistPhase('${phase.id}')" 
+                                class="text-red-400 hover:text-red-300 text-xs">
+                            ✕ Remove
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[8px] fira text-gray-500 mb-1">Price (KTA)</label>
+                            <input type="number" value="${phase.priceKTA}" step="0.1" min="0"
+                                   onchange="window.whitelistPhases[${index}].priceKTA = parseFloat(this.value)"
+                                   class="w-full bg-black/60 border border-purple-500/20 rounded px-3 py-2 text-white fira text-xs outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[8px] fira text-gray-500 mb-1">Max Mints</label>
+                            <input type="number" value="${phase.maxMintsPerWallet}" min="1" max="10"
+                                   onchange="window.whitelistPhases[${index}].maxMintsPerWallet = parseInt(this.value)"
+                                   class="w-full bg-black/60 border border-purple-500/20 rounded px-3 py-2 text-white fira text-xs outline-none">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[8px] fira text-gray-500 mb-1">Start Time</label>
+                            <input type="datetime-local" 
+                                   value="${phase.startTime ? new Date(phase.startTime).toISOString().slice(0, 16) : ''}"
+                                   onchange="window.whitelistPhases[${index}].startTime = this.value ? new Date(this.value).toISOString() : null"
+                                   class="w-full bg-black/60 border border-purple-500/20 rounded px-2 py-2 text-white fira text-[10px] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[8px] fira text-gray-500 mb-1">End Time</label>
+                            <input type="datetime-local"
+                                   value="${phase.endTime ? new Date(phase.endTime).toISOString().slice(0, 16) : ''}"
+                                   onchange="window.whitelistPhases[${index}].endTime = this.value ? new Date(this.value).toISOString() : null"
+                                   class="w-full bg-black/60 border border-purple-500/20 rounded px-2 py-2 text-white fira text-[10px] outline-none">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[8px] fira text-gray-500 mb-1">Wallets (comma-separated)</label>
+                        <textarea 
+                            onchange="window.whitelistPhases[${index}].wallets = this.value.split(',').map(w => w.trim()).filter(Boolean)"
+                            class="w-full bg-black/60 border border-purple-500/20 rounded px-3 py-2 text-white fira text-[10px] outline-none font-mono resize-none"
+                            rows="2"
+                            placeholder="keeta_abc..., keeta_def...">${phase.wallets.join(', ')}</textarea>
+                        <p class="text-[9px] fira text-gray-600 mt-1">${phase.wallets.length} wallets in this phase</p>
+                    </div>
+                </div>
+            `).join('');
+        };
+        
+        window.getActivePhaseForWallet = (collectionId, walletAddress) => {
+            const settings = state.whitelistSettings[collectionId];
+            if (!settings?.phases || settings.phases.length === 0) return null;
+            
+            const now = Date.now();
+            
+            // Find active phase for this wallet
+            for (const phase of settings.phases) {
+                // Check if wallet is in this phase
+                if (!phase.wallets.includes(walletAddress)) continue;
+                
+                // Check if phase is active (time-based)
+                if (phase.startTime) {
+                    const startTime = new Date(phase.startTime).getTime();
+                    if (now < startTime) continue; // Phase hasn't started
+                }
+                
+                if (phase.endTime) {
+                    const endTime = new Date(phase.endTime).getTime();
+                    if (now > endTime) continue; // Phase has ended
+                }
+                
+                return phase; // Found active phase
+            }
+            
+            return null; // Not in any active phase
+        };
+
         window.saveWhitelistSettings = async () => {
             const currentCollection = state.collections.find(c => c.blindMintEnabled);
             if (!currentCollection) {
@@ -6264,10 +6729,11 @@
                     defaultMaxMints: parseInt(document.getElementById('whitelistDefaultMax').value) || 1,
                     mintWindowStart: document.getElementById('whitelistStart').value ? new Date(document.getElementById('whitelistStart').value).toISOString() : null,
                     mintWindowEnd: document.getElementById('whitelistEnd').value ? new Date(document.getElementById('whitelistEnd').value).toISOString() : null,
+                    phases: window.whitelistPhases, // Save phases with custom pricing
                     updatedAt: new Date().toISOString()
                 };
                 
-                const settingsRef = doc(db, 'artifacts', state.appId, 'public', 'data', 'whitelistSettings', currentCollection.collectionId);
+                const settingsRef = doc(db, 'whitelistSettings', currentCollection.collectionId);
                 await setDoc(settingsRef, settings, { merge: true });
                 
                 state.whitelistSettings[currentCollection.collectionId] = settings;
@@ -6788,6 +7254,9 @@
                 
                 // Setup listeners
                 window.setupNFTListener();
+                
+                // Initialize activity feed
+                window.initActivityFeed();
             }
             
             // Initialize escrow
