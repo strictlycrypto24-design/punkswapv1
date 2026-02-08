@@ -1063,6 +1063,15 @@
                         </button>
                     </div>
                     
+                    <div class="flex gap-4">
+                        <button onclick="window.forceSyncCollections()" class="flex-1 p-3 rounded-lg border border-purple-500/30 text-purple-400 orbitron text-xs font-bold uppercase hover:bg-purple-500/10 transition-all">
+                            🔄 Force Sync Collections
+                        </button>
+                        <button onclick="window.clearGhostData()" class="flex-1 p-3 rounded-lg border border-orange-500/30 text-orange-400 orbitron text-xs font-bold uppercase hover:bg-orange-500/10 transition-all">
+                            👻 Clear Ghost Data
+                        </button>
+                    </div>
+                    
                     <div class="text-center">
                         <button onclick="window.hardRefreshPage()" class="text-xs orbitron text-gray-500 uppercase hover:text-white transition-colors">
                             Or click here for full page refresh (F5)
@@ -2818,8 +2827,25 @@
             if (!db) return;
             
             try {
-                const collectionsRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'collections');
-                const snapshot = await getDocs(collectionsRef);
+                // Try primary path first
+                let collectionsRef = collection(db, 'artifacts', state.appId, 'public', 'data', 'collections');
+                let snapshot = await getDocs(collectionsRef);
+                
+                // If empty, try alternate path (direct under artifacts)
+                if (snapshot.empty) {
+                    console.warn("⚠️ No collections at primary path, trying alternate...");
+                    console.log("🔍 Tried:", `artifacts/${state.appId}/public/data/collections`);
+                    
+                    collectionsRef = collection(db, 'collections');
+                    snapshot = await getDocs(collectionsRef);
+                    
+                    if (snapshot.empty) {
+                        console.warn("⚠️ No collections at root /collections either");
+                        console.log("🔍 Tried:", `collections`);
+                    } else {
+                        console.log("✅ Found collections at root /collections path");
+                    }
+                }
                 
                 state.collections = [];
                 snapshot.forEach(doc => {
@@ -2829,9 +2855,13 @@
                 console.log(`✅ Loaded ${state.collections.length} collections`);
                 if (state.collections.length > 0) {
                     console.log("📦 Sample collection:", state.collections[0]);
+                    console.log("📍 Collections loaded from Firebase successfully");
                 } else {
                     console.warn("⚠️ Query returned 0 collections");
-                    console.log("🔍 Expected path:", `artifacts/${state.appId}/public/data/collections`);
+                    console.log("🔍 Check these paths in Firebase:");
+                    console.log("   1.", `artifacts/${state.appId}/public/data/collections`);
+                    console.log("   2.", `collections`);
+                    console.log("💡 Collections may be stored elsewhere in your database");
                 }
                 window.renderCollections();
                 window.updateAirdropVisibility();
@@ -8429,6 +8459,85 @@
         window.forceReload = async () => {
             // Legacy function - redirect to new wipe function
             await window.wipeUIAndReload(false);
+        };
+        
+        // ═══════════════════════════════════════════════════════════════════
+        // FORCE SYNC & GHOST DATA CLEANUP
+        // ═══════════════════════════════════════════════════════════════════
+        
+        window.forceSyncCollections = async () => {
+            if (!confirm("🔄 Force sync collections from Firebase? This will clear cached collections and reload from database.")) return;
+            
+            try {
+                console.log("🔄 Force syncing collections...");
+                window.notify("🔄 Syncing collections from Firebase...", "success");
+                
+                // Clear current collections
+                state.collections = [];
+                console.log("✅ Cleared cached collections");
+                
+                // Reload from Firebase
+                await window.loadCollections();
+                
+                // Reload related data
+                await window.loadTraitCounts();
+                
+                // Refresh UI
+                window.renderCollections();
+                window.renderMarketplace();
+                window.updateCachedItemsDisplay();
+                
+                window.notify(`✅ Synced ${state.collections.length} collections from Firebase`, "success");
+                console.log(`✅ Collections synced: ${state.collections.length} found`);
+                
+            } catch (error) {
+                console.error("❌ Force sync failed:", error);
+                window.notify("❌ Sync failed: " + error.message, "error");
+            }
+        };
+        
+        window.clearGhostData = async () => {
+            if (!confirm("👻 Clear ghost data? This will:\n- Clear collections with 0 NFTs\n- Clear invalid collection references\n- Force reload from database")) return;
+            
+            try {
+                console.log("👻 Clearing ghost data...");
+                window.notify("👻 Clearing ghost data...", "success");
+                
+                // Count NFTs per collection
+                const collectionNFTCounts = {};
+                state.nfts.forEach(nft => {
+                    const colId = nft.collectionId || nft.collection;
+                    collectionNFTCounts[colId] = (collectionNFTCounts[colId] || 0) + 1;
+                });
+                
+                // Filter out collections with no NFTs or invalid data
+                const beforeCount = state.collections.length;
+                state.collections = state.collections.filter(col => {
+                    const colId = col.collectionId || col.id;
+                    const nftCount = collectionNFTCounts[colId] || 0;
+                    
+                    // Keep if has NFTs or is actively listed
+                    return nftCount > 0 || col.blindMintEnabled === true;
+                });
+                
+                const removed = beforeCount - state.collections.length;
+                console.log(`👻 Removed ${removed} ghost collections (had 0 NFTs)`);
+                
+                // Reload from Firebase to get fresh data
+                await window.loadCollections();
+                await window.loadNFTsFromFirebase();
+                
+                // Refresh UI
+                window.renderCollections();
+                window.renderMarketplace();
+                window.updateCachedItemsDisplay();
+                
+                window.notify(`✅ Cleared ${removed} ghost collections. ${state.collections.length} valid collections remain.`, "success");
+                
+            } catch (error) {
+                console.error("❌ Ghost cleanup failed:", error);
+                window.notify("❌ Cleanup failed: " + error.message, "error");
+            }
         };
 
         // Call initialization when DOM is ready
