@@ -6695,29 +6695,57 @@
         
         window.getActivePhaseForWallet = (collectionId, walletAddress) => {
             const settings = state.whitelistSettings[collectionId];
-            if (!settings?.phases || settings.phases.length === 0) return null;
+            if (!settings?.phases || settings.phases.length === 0) {
+                console.log(`💎 No phases configured for collection: ${collectionId}`);
+                return null;
+            }
             
             const now = Date.now();
+            console.log(`💎 Checking ${settings.phases.length} phases for wallet: ${walletAddress}`);
             
             // Find active phase for this wallet
             for (const phase of settings.phases) {
-                // Check if wallet is in this phase
-                if (!phase.wallets.includes(walletAddress)) continue;
+                console.log(`💎 Checking phase "${phase.name}":`, {
+                    priceKTA: phase.priceKTA,
+                    wallets: phase.wallets,
+                    startTime: phase.startTime,
+                    endTime: phase.endTime
+                });
+                
+                // Check if wallet is in this phase (case-insensitive)
+                const walletInPhase = phase.wallets.some(w => 
+                    w.toLowerCase().trim() === walletAddress.toLowerCase().trim()
+                );
+                
+                if (!walletInPhase) {
+                    console.log(`💎 Wallet not in phase "${phase.name}"`);
+                    continue;
+                }
+                
+                console.log(`✅ Wallet found in phase "${phase.name}"`);
                 
                 // Check if phase is active (time-based)
                 if (phase.startTime) {
                     const startTime = new Date(phase.startTime).getTime();
-                    if (now < startTime) continue; // Phase hasn't started
+                    if (now < startTime) {
+                        console.log(`💎 Phase "${phase.name}" hasn't started yet`);
+                        continue; // Phase hasn't started
+                    }
                 }
                 
                 if (phase.endTime) {
                     const endTime = new Date(phase.endTime).getTime();
-                    if (now > endTime) continue; // Phase has ended
+                    if (now > endTime) {
+                        console.log(`💎 Phase "${phase.name}" has ended`);
+                        continue; // Phase has ended
+                    }
                 }
                 
+                console.log(`✅ Active phase found: "${phase.name}" with price ${phase.priceKTA} KTA`);
                 return phase; // Found active phase
             }
             
+            console.log(`💎 No active phase found for wallet`);
             return null; // Not in any active phase
         };
 
