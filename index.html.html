@@ -7703,13 +7703,6 @@
                 console.log("✅ [STEP 2] Metadata resolved:", metadata.name);
                 return { metadata, imagePath, mintIndex };
             }
-                if (!metadata.name || !metadata.image) throw new Error("Invalid metadata schema: missing name or image");
-                let imagePath = metadata.image;
-                if (imagePath.startsWith('ipfs://')) imagePath = imagePath.replace('ipfs://', '');
-                else if (!imagePath.startsWith('http')) imagePath = `${collection.ipfsCid}/${imagePath}`;
-                console.log("✅ [STEP 2] Metadata resolved:", metadata.name);
-                return { metadata, imagePath, mintIndex };
-            }
 
             async createNFTToken(req, metadata, collection) {
                 console.log("🎨 [STEP 3] Creating NFT token with TWO-TRANSACTION pattern...");
