@@ -7495,9 +7495,24 @@
 
             async getAndIncrementMintIndex(collectionId) {
                 const collectionRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'collections', collectionId);
+                
+                // Get current state
+                const beforeSnap = await getDoc(collectionRef);
+                const beforeCount = beforeSnap.data().mintedCount || 0;
+                console.log(`📈 BEFORE increment: mintedCount=${beforeCount}, remainingSupply=${beforeSnap.data().remainingSupply}`);
+                
+                // Increment
                 await updateDoc(collectionRef, { mintedCount: increment(1), remainingSupply: increment(-1) });
-                const snap = await getDoc(collectionRef);
-                return (snap.data().mintedCount || 1) - 1;
+                
+                // Get new state
+                const afterSnap = await getDoc(collectionRef);
+                const afterCount = afterSnap.data().mintedCount || 0;
+                console.log(`📈 AFTER increment: mintedCount=${afterCount}, remainingSupply=${afterSnap.data().remainingSupply}`);
+                
+                const mintIndex = afterCount - 1;
+                console.log(`🎯 Mint will use index: ${mintIndex}`);
+                
+                return mintIndex;
             }
 
             extractHashFromTx(tx) {
@@ -7590,15 +7605,32 @@
                 console.log("📄 [STEP 2] Resolving metadata...");
                 const collection = await this.getCollection(collectionId);
                 const mintIndex = await this.getAndIncrementMintIndex(collectionId);
+                
+                console.log(`📊 Collection info:`, {
+                    blindMintEnabled: collection.blindMintEnabled,
+                    scannedFilesCount: collection.scannedFiles?.length || 0,
+                    mintIndex: mintIndex,
+                    totalSupply: collection.totalSupply
+                });
+                
                 let filename;
                 if (collection.blindMintEnabled && collection.scannedFiles?.length) {
                     filename = collection.scannedFiles[mintIndex] || `${String(mintIndex + 1).padStart(3, '0')}.json`;
                     console.log(`🎲 Blind mint: Index ${mintIndex} → File ${filename}`);
+                    console.log(`📁 ScannedFiles array has ${collection.scannedFiles.length} files`);
+                    
+                    // Warn if index is beyond scannedFiles length
+                    if (mintIndex >= collection.scannedFiles.length) {
+                        console.warn(`⚠️ WARNING: Mint index ${mintIndex} exceeds scannedFiles length ${collection.scannedFiles.length}`);
+                    }
                 } else {
                     filename = `${String(mintIndex + 1).padStart(3, '0')}.json`;
+                    console.log(`📝 Sequential mint: Index ${mintIndex} → File ${filename}`);
                 }
+                
                 const gateways = ['https://ipfs.io/ipfs', 'https://gateway.pinata.cloud/ipfs', 'https://cloudflare-ipfs.com/ipfs'];
                 let metadata = null;
+                
                 // Clean CID and filename to prevent double slashes and remove ipfs:// protocol
                 let cleanCid = collection.ipfsCid || '';
                 // Remove ipfs:// protocol prefix if present
@@ -7609,15 +7641,38 @@
                 cleanCid = cleanCid.replace(/^\/+|\/+$/g, '');
                 const cleanFilename = filename.replace(/^\/+/g, '');
                 
+                console.log(`🔗 Final URL components: CID=${cleanCid.substring(0, 20)}... File=${cleanFilename}`);
+                
                 for (const gw of gateways) {
                     try {
                         const metaUrl = `${gw}/${cleanCid}/${cleanFilename}`;
                         console.log(`🔍 Trying: ${metaUrl}`);
                         const res = await fetch(metaUrl);
-                        if (res.ok) { metadata = await res.json(); break; }
-                    } catch (e) { console.warn(`Gateway failed: ${e.message}`); continue; }
+                        if (res.ok) { 
+                            metadata = await res.json(); 
+                            console.log(`✅ Metadata loaded from: ${gw}`);
+                            break; 
+                        } else {
+                            console.warn(`⚠️ Gateway returned ${res.status}: ${gw}`);
+                        }
+                    } catch (e) { 
+                        console.warn(`❌ Gateway failed (${e.message}): ${gw}`); 
+                        continue; 
+                    }
                 }
-                if (!metadata) throw new Error(`Metadata fetch failed: ${cleanCid}/${cleanFilename}`);
+                
+                if (!metadata) {
+                    console.error(`❌ All gateways failed for: ${cleanCid}/${cleanFilename}`);
+                    throw new Error(`Metadata fetch failed: ${cleanCid}/${cleanFilename}`);
+                }
+                
+                if (!metadata.name || !metadata.image) throw new Error("Invalid metadata schema: missing name or image");
+                let imagePath = metadata.image;
+                if (imagePath.startsWith('ipfs://')) imagePath = imagePath.replace('ipfs://', '');
+                else if (!imagePath.startsWith('http')) imagePath = `${collection.ipfsCid}/${imagePath}`;
+                console.log("✅ [STEP 2] Metadata resolved:", metadata.name);
+                return { metadata, imagePath, mintIndex };
+            }
                 if (!metadata.name || !metadata.image) throw new Error("Invalid metadata schema: missing name or image");
                 let imagePath = metadata.image;
                 if (imagePath.startsWith('ipfs://')) imagePath = imagePath.replace('ipfs://', '');
@@ -7887,10 +7942,19 @@
                     if (mintIndex !== null && collectionRef) {
                         try {
                             console.log(`🔄 Rolling back mint index ${mintIndex} due to pipeline failure`);
+                            
+                            // Check state before rollback
+                            const beforeRollback = await getDoc(collectionRef);
+                            console.log(`📉 BEFORE rollback: mintedCount=${beforeRollback.data().mintedCount}, remainingSupply=${beforeRollback.data().remainingSupply}`);
+                            
                             await updateDoc(collectionRef, {
                                 mintedCount: increment(-1),
                                 remainingSupply: increment(1)
                             });
+                            
+                            // Check state after rollback
+                            const afterRollback = await getDoc(collectionRef);
+                            console.log(`📉 AFTER rollback: mintedCount=${afterRollback.data().mintedCount}, remainingSupply=${afterRollback.data().remainingSupply}`);
                             console.log(`✅ Rollback successful - mint cancelled`);
                         } catch (rollbackErr) {
                             console.error("❌ Rollback failed:", rollbackErr);
