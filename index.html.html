@@ -2841,7 +2841,7 @@
                     console.log(`🎲 Calculated rarity for ${rarityCount} NFTs`);
                 } else {
                     console.warn("⚠️ Query returned 0 NFTs - checking Firebase path...");
-                    console.log("🔍 Expected path:", `artifacts/${state.appId}/public/data/nfts`);
+                    console.log("🔍 Expected path:", `nfts`);
                     console.log("🔍 Check Firebase Console: Is data at this exact path?");
                 }
                 window.updateStats();
@@ -3160,7 +3160,7 @@
                 } else {
                     console.warn("⚠️ Query returned 0 collections");
                     console.log("🔍 Check these paths in Firebase:");
-                    console.log("   1.", `artifacts/${state.appId}/public/data/collections`);
+                    console.log("   1.", `collections`);
                     console.log("   2.", `collections`);
                     console.log("💡 Collections may be stored elsewhere in your database");
                 }
@@ -3806,7 +3806,7 @@
                 // NOTE: mintedCount already incremented atomically above (line ~2266)
                 // No need to update again here
                 
-                const walletTrackingRef = doc(db, 'artifacts', state.appId, 'public', 'data', 'walletMintTracking', `${state.address}_${collection.collectionId}`);
+                const walletTrackingRef = doc(db, 'walletMintTracking', `${state.address}_${collection.collectionId}`);
                 const trackingSnap = await getDoc(walletTrackingRef);
                 const currentCount = trackingSnap.exists() ? trackingSnap.data().mintedCount : 0;
                 
@@ -6439,7 +6439,7 @@
         // Remove wallet from whitelist
         window.removeWhitelistWallet = async (collectionId, walletId) => {
             try {
-                const walletRef = doc(db, 'artifacts', state.appId, 'public', 'data', 'whitelistWallets', walletId);
+                const walletRef = doc(db, 'whitelistWallets', walletId);
                 await deleteDoc(walletRef);
                 
                 // Remove from local state
@@ -6797,7 +6797,7 @@
         // Update wallet stats for KTA tracking
         window.updateWalletStats = async (transaction) => {
             try {
-                const walletStatsRef = doc(db, 'artifacts', state.appId, 'public', 'data', 'walletStats', state.address);
+                const walletStatsRef = doc(db, 'walletStats', state.address);
                 const walletStatsSnap = await getDoc(walletStatsRef);
                 
                 let stats = walletStatsSnap.exists() ? walletStatsSnap.data() : {
@@ -7948,20 +7948,20 @@
             }
 
             async getCollection(collectionId) {
-                const ref = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'collections', collectionId);
+                const ref = doc(this.db, 'collections', collectionId);
                 const snap = await getDoc(ref);
                 if (!snap.exists()) return null;
                 return { id: snap.id, ...snap.data() };
             }
 
             async getUserMintCount(collectionId, userWallet) {
-                const ref = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'walletMintTracking', `${userWallet}_${collectionId}`);
+                const ref = doc(this.db, 'walletMintTracking', `${userWallet}_${collectionId}`);
                 const snap = await getDoc(ref);
                 return snap.exists() ? (snap.data().mintedCount || 0) : 0;
             }
 
             async checkWhitelist(collectionId, userWallet) {
-                const walletsRef = collection(this.db, 'artifacts', this.appId, 'public', 'data', 'whitelistWallets');
+                const walletsRef = collection(this.db, 'whitelistWallets');
                 const q = query(walletsRef, where('collectionId', '==', collectionId), where('walletAddress', '==', userWallet));
                 const snap = await getDocs(q);
                 if (snap.empty) return false;
@@ -7980,7 +7980,7 @@
             }
 
             async getAndIncrementMintIndex(collectionId) {
-                const collectionRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'collections', collectionId);
+                const collectionRef = doc(this.db, 'collections', collectionId);
                 
                 // Get current state
                 const beforeSnap = await getDoc(collectionRef);
@@ -8293,7 +8293,7 @@
                 }
                 const collection = await this.getCollection(req.collectionId);
                 const docId = `nft_${getNormalizedId(collection.collectionToken || collection.id)}_${mintIndex}`;
-                await setDoc(doc(this.db, 'artifacts', this.appId, 'public', 'data', 'nfts', docId), {
+                await setDoc(doc(this.db, 'nfts', docId), {
                     id: docId,
                     tokenId,
                     owner: req.userWallet,
@@ -8321,7 +8321,7 @@
                     wasBlindMinted: !!collection.blindMintEnabled,
                     externalUrl: metadata.external_url || ''
                 });
-                const walletTrackingRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'walletMintTracking', `${req.userWallet}_${req.collectionId}`);
+                const walletTrackingRef = doc(this.db, 'walletMintTracking', `${req.userWallet}_${req.collectionId}`);
                 const trackingSnap = await getDoc(walletTrackingRef);
                 const currentCount = trackingSnap.exists() ? trackingSnap.data().mintedCount : 0;
                 await setDoc(walletTrackingRef, { walletAddress: req.userWallet, collectionId: req.collectionId, mintedCount: currentCount + 1 });
@@ -8331,7 +8331,7 @@
                     const entry = wallets.find(w => (w.walletAddress || '').toLowerCase() === req.userWallet.toLowerCase());
                     if (entry) {
                         try {
-                            const walletRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'whitelistWallets', entry.id);
+                            const walletRef = doc(this.db, 'whitelistWallets', entry.id);
                             await updateDoc(walletRef, { usedMints: (entry.usedMints || 0) + 1 });
                         } catch (e) { console.warn("Whitelist usage increment failed:", e); }
                     }
@@ -8375,7 +8375,7 @@
                         await req.userClient.publishBuilder(transferBuilder);
                         
                         // Update Firebase to show escrow as owner
-                        await updateDoc(doc(this.db, 'artifacts', state.appId, 'public', 'data', 'nfts', docId), {
+                        await updateDoc(doc(this.db, 'nfts', docId), {
                             owner: state.escrowAddress,
                             inEscrow: true
                         });
@@ -8405,7 +8405,7 @@
                     mintIndex = resolvedIndex;
                     
                     // Store collection ref for potential rollback
-                    collectionRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'collections', req.collectionId);
+                    collectionRef = doc(this.db, 'collections', req.collectionId);
                     
                     const collection = await this.getCollection(req.collectionId);
                     const tokenId = await this.createNFTToken(req, metadata, collection);
