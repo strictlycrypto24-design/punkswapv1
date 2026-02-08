@@ -6760,7 +6760,10 @@
         };
         
         window.getActivePhaseForWallet = (collectionId, walletAddress) => {
-            const settings = state.whitelistSettings[collectionId];
+            // Strip 'collection_' prefix if present to match stored settings
+            const cleanCollectionId = collectionId?.replace?.(/^collection_/, '') || collectionId;
+            
+            const settings = state.whitelistSettings[cleanCollectionId];
             if (!settings?.phases || settings.phases.length === 0) {
                 console.log(`💎 No phases configured for collection: ${collectionId}`);
                 return null;
