@@ -615,6 +615,10 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Offers
                 </div>
+                <div id="nav-auctions" onclick="window.switchTab('auctions')" class="nav-item">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Auctions
+                </div>
                 <div id="nav-activity" onclick="window.switchTab('activity')" class="nav-item">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                     Activity Feed
@@ -847,6 +851,13 @@
                 </div>
                 
                 <div id="colPageGrid" class="grid grid-cols-2 md:grid-cols-5 gap-6"></div>
+                
+                <!-- Collection Comments Section -->
+                <div class="glass-card p-8 mt-8">
+                    <div id="commentsSection_collection" class="space-y-4">
+                        <div class="text-center py-8 text-gray-500 fira text-sm">Loading comments...</div>
+                    </div>
+                </div>
             </section>
 
             <!-- Personal Modules -->
@@ -1012,6 +1023,21 @@
                                 <strong>How to make an offer:</strong> Go to Explorer → click a collection → find an unlisted NFT → click "💰 Make Offer"
                             </p>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AUCTIONS PAGE -->
+            <section id="tab-auctions" class="tab-content animate-view hidden space-y-8">
+                <div class="space-y-4">
+                    <h2 class="orbitron text-4xl font-black uppercase italic text-cyan-400">🎪 Live Auctions</h2>
+                    <p class="fira text-sm text-gray-400">Time-limited bidding on exclusive NFTs</p>
+                </div>
+                
+                <div id="auctionsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Auctions render here -->
+                    <div class="col-span-full text-center py-12 text-gray-500 fira text-sm">
+                        No active auctions
                     </div>
                 </div>
             </section>
@@ -1215,41 +1241,6 @@
                                     </div>
                                 </div>
                                 
-                                <!-- WHITELIST FEATURE -->
-                                <div class="p-6 bg-gradient-to-br from-cyan-900/10 to-purple-900/10 rounded-xl border border-cyan-500/20 space-y-4">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-4">
-                                            <span class="orbitron text-sm text-cyan-400 uppercase font-bold">Enable Whitelist</span>
-                                            <label class="cyber-switch">
-                                                <input type="checkbox" id="enableWhitelist" onchange="window.toggleWhitelistUI()">
-                                                <span class="slider"></span>
-                                            </label>
-                                        </div>
-                                        <span class="fira text-xs text-gray-500" id="whitelistCount">0 addresses</span>
-                                    </div>
-                                    
-                                    <div id="whitelistInputContainer" class="hidden space-y-4 animate-view">
-                                        <div>
-                                            <label class="block text-[9px] orbitron text-cyan-400 uppercase font-black mb-2">Whitelisted Wallet Addresses</label>
-                                            <textarea id="whitelistAddresses" rows="6" placeholder="keeta_aab5o4wtbzgfvrsxntftzsecq2l7daek2mzsbni6fc43et5v7r4ihgpn4pv3nra&#10;keeta_another_address_here&#10;keeta_..." class="w-full bg-black/60 border border-cyan-500/20 p-4 rounded-xl fira text-xs text-white outline-none focus:border-cyan-500 font-mono" oninput="window.updateWhitelistCount()"></textarea>
-                                            <div class="fira text-[9px] text-gray-500 mt-2">Enter one Keeta wallet address per line. Only these wallets will be able to mint.</div>
-                                        </div>
-                                        
-                                        <div class="flex gap-3">
-                                            <button onclick="window.validateWhitelist()" class="flex-1 p-3 rounded-lg border border-cyan-500/30 text-[9px] orbitron font-bold uppercase text-cyan-400 hover:bg-cyan-500/10 transition-all">
-                                                ✓ Validate Addresses
-                                            </button>
-                                            <button onclick="window.importWhitelistCSV()" class="flex-1 p-3 rounded-lg border border-purple-500/30 text-[9px] orbitron font-bold uppercase text-purple-400 hover:bg-purple-500/10 transition-all">
-                                                📄 Import CSV
-                                            </button>
-                                            <button onclick="window.clearWhitelist()" class="flex-1 p-3 rounded-lg border border-red-500/30 text-[9px] orbitron font-bold uppercase text-red-400 hover:bg-red-500/10 transition-all">
-                                                × Clear All
-                                            </button>
-                                        </div>
-                                        
-                                        <div id="whitelistStatus" class="hidden p-3 rounded-lg border"></div>
-                                    </div>
-                                </div>
                                 <div class="grid grid-cols-2 gap-6">
                                     <div id="ktaInputBox" class="bg-black/60 p-5 rounded-xl border border-white/5">
                                         <span class="text-[8px] orbitron text-cyan-400 uppercase font-black">KTA Base Price</span>
@@ -1308,6 +1299,62 @@
                             </div>
                         </div>
                         <div class="space-y-8">
+                            <!-- My Whitelists Panel -->
+                            <div class="glass-card p-10 space-y-6 border-cyan-500/20">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 class="orbitron text-[10px] text-cyan-400 font-bold uppercase tracking-widest">My Active Whitelists</h4>
+                                        <p class="fira text-[9px] text-gray-500 mt-1">Collections you've configured with whitelist settings</p>
+                                    </div>
+                                    <button onclick="window.refreshMyWhitelists()" class="text-cyan-400 hover:text-cyan-300 text-xs orbitron">🔄 Refresh</button>
+                                </div>
+                                
+                                <div id="myWhitelistsContainer" class="space-y-3">
+                                    <div class="text-center py-8 text-gray-600 fira text-sm">
+                                        Loading...
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Collection Verification Panel (Admin Only) -->
+                            <div id="verificationPanel" class="hidden glass-card p-10 space-y-6 border-blue-500/20">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 class="orbitron text-[10px] text-blue-400 font-bold uppercase tracking-widest">✅ Collection Verification</h4>
+                                        <p class="fira text-[9px] text-gray-500 mt-1">Add or remove verified badges (Escrow Only)</p>
+                                    </div>
+                                    <div class="bg-blue-500/10 px-3 py-1 rounded text-[9px] orbitron text-blue-400 font-bold">ADMIN</div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-[9px] orbitron text-blue-400 uppercase font-black mb-2">Select Collection</label>
+                                    <select id="verifyCollectionSelector" class="w-full bg-black/60 border border-blue-500/30 rounded-lg px-4 py-3 text-white fira text-sm outline-none">
+                                        <option value="">-- Select a Collection --</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="verificationControls" class="hidden space-y-3">
+                                    <div class="bg-blue-900/20 border border-blue-500/30 p-4 rounded-lg">
+                                        <div class="text-sm text-blue-400 font-bold mb-2">ℹ️ About Verification</div>
+                                        <div class="text-xs text-gray-400 space-y-1">
+                                            <div>• Blue checkmark shows collection is authentic</div>
+                                            <div>• Increases buyer confidence and trust</div>
+                                            <div>• Only escrow wallet can verify</div>
+                                            <div>• Visible on all collection cards</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex gap-3">
+                                        <button id="verifyBtn" onclick="window.verifyCollectionFromPanel()" class="flex-1 bg-blue-500/20 border-2 border-blue-500/50 text-blue-400 p-4 rounded-xl orbitron font-bold hover:bg-blue-500/30 transition-all">
+                                            ✅ Verify Collection
+                                        </button>
+                                        <button id="unverifyBtn" onclick="window.unverifyCollectionFromPanel()" class="flex-1 bg-red-500/20 border-2 border-red-500/50 text-red-400 p-4 rounded-xl orbitron font-bold hover:bg-red-500/30 transition-all">
+                                            🗑️ Remove Verification
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <!-- Whitelist Settings Panel -->
                             <div class="glass-card p-10 space-y-6 border-purple-500/20">
                                 <div class="flex justify-between items-center">
@@ -1318,82 +1365,48 @@
                                     </label>
                                 </div>
                                 
+                                <!-- Collection Selector -->
+                                <div>
+                                    <label class="block text-[9px] orbitron text-cyan-400 uppercase font-black mb-2">Select Collection</label>
+                                    <select id="whitelistCollectionSelector" onchange="window.loadWhitelistSettings(this.value)" class="w-full bg-black/60 border border-cyan-500/30 rounded-lg px-4 py-3 text-white fira text-sm outline-none">
+                                        <option value="">-- Select a Collection --</option>
+                                    </select>
+                                    <p class="text-[9px] fira text-gray-500 mt-2">Select a collection to configure its whitelist</p>
+                                </div>
+                                
                                 <div id="whitelistControls" class="hidden space-y-6">
-                                    <!-- Whitelist Mode -->
-                                    <div>
-                                        <label class="block text-[9px] orbitron text-gray-500 uppercase font-black mb-2">Whitelist Mode</label>
-                                        <select id="whitelistMode" class="w-full bg-black/60 border border-purple-500/30 rounded-lg px-4 py-3 text-white fira text-sm outline-none">
-                                            <option value="BLIND_MINT">Blind Mint Only</option>
-                                            <option value="STANDARD_MINT">Standard Mint Only</option>
-                                            <option value="BOTH">Both Mint Types</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <!-- Mint Window -->
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-[9px] orbitron text-gray-500 uppercase font-black mb-2">Window Start</label>
-                                            <input type="datetime-local" id="whitelistStart" class="w-full bg-black/60 border border-purple-500/30 rounded-lg px-4 py-3 text-white fira text-sm outline-none">
-                                        </div>
-                                        <div>
-                                            <label class="block text-[9px] orbitron text-gray-500 uppercase font-black mb-2">Window End</label>
-                                            <input type="datetime-local" id="whitelistEnd" class="w-full bg-black/60 border border-purple-500/30 rounded-lg px-4 py-3 text-white fira text-sm outline-none">
+                                    <!-- Enable/Disable Toggle -->
+                                    <div class="bg-gradient-to-r from-purple-900/20 to-pink-900/20 p-6 rounded-xl border border-purple-500/30">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h5 class="orbitron text-sm text-purple-400 uppercase font-black">Whitelist Enabled</h5>
+                                                <p class="fira text-[10px] text-gray-500 mt-1">Only wallets in phases below can mint</p>
+                                            </div>
+                                            <label class="cyber-switch">
+                                                <input type="checkbox" id="whitelistEnabled" onchange="window.toggleWhitelistSettingsUI()">
+                                                <span class="slider"></span>
+                                            </label>
                                         </div>
                                     </div>
                                     
-                                    <!-- Default Max Mints -->
-                                    <div>
-                                        <label class="block text-[9px] orbitron text-gray-500 uppercase font-black mb-2">Default Max Mints per Wallet</label>
-                                        <input type="number" id="whitelistDefaultMax" value="1" min="1" max="10" class="w-full bg-black/60 border border-purple-500/30 rounded-lg px-4 py-3 text-white fira text-sm outline-none">
-                                    </div>
-                                    
-                                    <!-- WHITELIST PHASES WITH CUSTOM PRICING -->
+                                    <!-- WHITELIST PHASES -->
                                     <div class="bg-gradient-to-br from-purple-900/20 to-pink-900/20 p-6 rounded-xl border border-purple-500/30 space-y-4">
                                         <div class="flex items-center justify-between">
-                                            <h5 class="orbitron text-[9px] text-purple-400 uppercase font-black">Whitelist Phases (Custom Pricing)</h5>
-                                            <button onclick="window.addWhitelistPhase()" class="text-xs px-3 py-1 rounded bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-all orbitron font-bold">+ Add Phase</button>
+                                            <div>
+                                                <h5 class="orbitron text-[10px] text-purple-400 uppercase font-black">Whitelist Phases</h5>
+                                                <p class="fira text-[9px] text-gray-500 mt-1">Create phases with custom pricing for different wallet groups</p>
+                                            </div>
+                                            <button onclick="window.addWhitelistPhase()" class="text-xs px-4 py-2 rounded bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-all orbitron font-bold">+ Add Phase</button>
                                         </div>
-                                        <p class="fira text-[10px] text-gray-500">Create multiple whitelist phases with different pricing per phase</p>
                                         
-                                        <div id="whitelistPhasesContainer" class="space-y-3">
+                                        <div id="whitelistPhasesContainer" class="space-y-3 mt-4">
                                             <!-- Phases will be added here -->
                                         </div>
                                         
-                                        <div class="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-3">
-                                            <p class="fira text-[9px] text-cyan-300">
-                                                💡 <strong>Example:</strong> Phase 1 (OG): 0.5 KTA | Phase 2 (Early): 1 KTA | Phase 3 (Public): 2 KTA
+                                        <div class="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-4 mt-4">
+                                            <p class="fira text-[9px] text-cyan-300 leading-relaxed">
+                                                💡 <strong>How it works:</strong> Each phase can have a different mint price. Add your wallet addresses to each phase (comma-separated). Wallets can be in multiple phases.
                                             </p>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Manual Entry -->
-                                    <div class="bg-black/40 p-6 rounded-lg border border-white/5">
-                                        <h5 class="orbitron text-[9px] text-cyan-400 uppercase font-black mb-4">Add Wallet Manually</h5>
-                                        <div class="flex gap-3 mb-4">
-                                            <input type="text" id="whitelistWallet" placeholder="Keeta wallet address..." class="flex-1 bg-black/60 border border-cyan-500/30 rounded-lg px-4 py-2 text-white fira text-xs outline-none">
-                                            <input type="number" id="whitelistMaxMints" value="1" min="1" max="10" class="w-20 bg-black/60 border border-cyan-500/30 rounded-lg px-3 py-2 text-white fira text-xs outline-none">
-                                            <button onclick="window.addWhitelistWallet()" class="btn-primary px-6 text-xs">+ Add</button>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- CSV/JSON Upload -->
-                                    <div class="bg-black/40 p-6 rounded-lg border border-white/5">
-                                        <h5 class="orbitron text-[9px] text-orange-400 uppercase font-black mb-4">Bulk Upload (CSV/JSON)</h5>
-                                        <input type="file" id="whitelistFileUpload" accept=".csv,.json" class="hidden" onchange="window.handleWhitelistUpload(event)">
-                                        <button onclick="document.getElementById('whitelistFileUpload').click()" class="w-full p-4 rounded-lg border border-orange-500/30 text-orange-400 orbitron text-xs font-bold uppercase hover:bg-orange-500/10 transition-all">
-                                            📁 Upload Whitelist File
-                                        </button>
-                                        <p class="fira text-[10px] text-gray-600 mt-2">CSV: wallet_address,max_mints | JSON: [{wallet, max_mints}]</p>
-                                    </div>
-                                    
-                                    <!-- Whitelist Table -->
-                                    <div class="bg-black/40 p-6 rounded-lg border border-white/5">
-                                        <div class="flex justify-between items-center mb-4">
-                                            <h5 class="orbitron text-[9px] text-cyan-400 uppercase font-black">Whitelisted Wallets (<span id="whitelistCount">0</span>)</h5>
-                                            <button onclick="window.clearWhitelist()" class="text-red-400 fira text-[10px] hover:text-red-300">Clear All</button>
-                                        </div>
-                                        <div id="whitelistTable" class="max-h-64 overflow-y-auto space-y-2">
-                                            <div class="text-center text-gray-600 fira text-xs py-8">No wallets added yet</div>
                                         </div>
                                     </div>
                                     
@@ -1402,8 +1415,8 @@
                                         <div class="flex items-start gap-3">
                                             <span class="text-yellow-500 text-xl">⚠️</span>
                                             <div class="fira text-[10px] text-yellow-200 space-y-1">
-                                                <p>• Whitelist affects access only, not rarity or NFT assignment</p>
-                                                <p>• Blind mint outcomes remain completely random</p>
+                                                <p>• Click "Save Whitelist Settings" below after making changes</p>
+                                                <p>• Whitelist only controls WHO can mint, not WHAT they get (blind mint is still random)</p>
                                                 <p>• Public mint resumes when whitelist is disabled</p>
                                                 <p>• You cannot bypass mint logic or assign specific NFTs</p>
                                             </div>
@@ -1731,7 +1744,12 @@
             // Offer system
             offers: [],
             myOffers: [],
-            offersOnMyNFTs: []
+            offersOnMyNFTs: [],
+            // Auction system
+            auctions: [],
+            myBids: [],
+            // Comments system
+            comments: {}  // nftId -> [comments]
         };
         
         window.state = state;
@@ -1812,9 +1830,17 @@
                 setTimeout(() => window.updateFloorPulse(), 100);
             } else if (tabName === 'collection') {
                 window.renderCollection();
+                // Load comments for the collection
+                if (state.viewingCollection) {
+                    window.loadComments('collection_' + state.viewingCollection).then(() => {
+                        window.renderComments('collection_' + state.viewingCollection);
+                    });
+                }
             } else if (tabName === 'offers' && state.address) {
                 window.loadOffers();
                 window.renderOffers();
+            } else if (tabName === 'auctions') {
+                window.loadAuctions().then(() => window.renderAuctions());
             } else if (tabName === 'activity') {
                 window.renderActivityFeed();
             }
@@ -2397,7 +2423,10 @@
             
             // Update cached items display when showing admin panel (escrow wallet only)
             if (isEscrowWallet) {
-                setTimeout(() => window.updateCachedItemsDisplay(), 100);
+                setTimeout(() => {
+                    window.updateCachedItemsDisplay();
+                    window.populateWhitelistCollectionSelector();
+                }, 100);
             }
         };
 
@@ -3231,7 +3260,18 @@
                     console.log("💡 Collections may be stored elsewhere in your database");
                 }
                 window.renderCollections();
+                window.populateWhitelistCollections(); // Populate whitelist dropdown
+                window.populateVerificationSelector(); // Populate verification dropdown
+                window.renderMyWhitelists(); // Render My Whitelists section
                 window.updateAirdropVisibility();
+                
+                // Show/hide verification panel (escrow only)
+                const verificationPanel = document.getElementById('verificationPanel');
+                if (verificationPanel && state.address === ESCROW_WALLET) {
+                    verificationPanel.classList.remove('hidden');
+                } else if (verificationPanel) {
+                    verificationPanel.classList.add('hidden');
+                }
                 
             } catch (error) {
                 console.error("Error loading collections:", error);
@@ -3947,71 +3987,102 @@
             container.innerHTML = activeCollections.map(col => {
                 // Check whitelist status
                 const whitelistSettings = state.whitelistSettings[col.collectionId];
-                let buttonClass = 'btn-primary w-full py-3 group-hover:bg-cyan-500/20';
+                let buttonClass = 'btn-primary w-full py-3 group-hover:bg-cyan-500/20 transition-all';
                 let buttonText = '🎲 Mystery Forge';
                 let buttonDisabled = '';
                 let statusBadge = '';
+                let countdownHTML = '';
+                let priceDisplay = '';
+                let cardHoverClass = 'hover:border-cyan-500/40 hover:shadow-[0_0_40px_rgba(0,255,255,0.3)]';
                 
                 if (whitelistSettings && whitelistSettings.enabled) {
-                    const wallets = state.whitelistWallets[col.collectionId] || [];
-                    const entry = state.address ? wallets.find(w => w.walletAddress.toLowerCase() === state.address.toLowerCase()) : null;
+                    // Check if wallet is in any phase
+                    let userPhase = null;
+                    if (state.address && whitelistSettings.phases && whitelistSettings.phases.length > 0) {
+                        userPhase = whitelistSettings.phases.find(phase => 
+                            phase.wallets && phase.wallets.some(w => w.toLowerCase() === state.address.toLowerCase())
+                        );
+                    }
                     
-                    // Check mint window
+                    // Check for time-based phases (start/end times)
                     const now = Date.now();
-                    let windowClosed = false;
+                    let phaseStartTime = userPhase?.startTime ? new Date(userPhase.startTime).getTime() : null;
+                    let phaseEndTime = userPhase?.endTime ? new Date(userPhase.endTime).getTime() : null;
                     
-                    if (whitelistSettings.mintWindowStart) {
-                        const startTime = new Date(whitelistSettings.mintWindowStart).getTime();
-                        if (now < startTime) {
-                            const minsLeft = Math.ceil((startTime - now) / 60000);
-                            buttonClass = 'w-full py-3 bg-orange-500/20 border border-orange-500/30 text-orange-400 cursor-not-allowed';
-                            buttonText = `⏰ Starts in ${minsLeft}m`;
+                    // Check mint tracking for this wallet
+                    const walletTracking = state.walletMintTracking?.[col.collectionId]?.[state.address] || null;
+                    const usedMints = walletTracking?.count || 0;
+                    const maxMints = userPhase?.maxMintsPerWallet || 1;
+                    
+                    if (state.address && userPhase) {
+                        cardHoverClass = 'hover:border-green-500/60 hover:shadow-[0_0_50px_rgba(34,197,94,0.4)] hover:scale-[1.02]';
+                        
+                        // Check if phase hasn't started yet
+                        if (phaseStartTime && now < phaseStartTime) {
+                            const timeLeft = phaseStartTime - now;
+                            const hours = Math.floor(timeLeft / 3600000);
+                            const minutes = Math.floor((timeLeft % 3600000) / 60000);
+                            const seconds = Math.floor((timeLeft % 60000) / 1000);
+                            
+                            buttonClass = 'w-full py-3 bg-orange-500/20 border border-orange-500/40 text-orange-300 cursor-not-allowed animate-pulse';
+                            buttonText = `⏰ Starts in ${hours}h ${minutes}m ${seconds}s`;
                             buttonDisabled = 'disabled';
-                            windowClosed = true;
+                            statusBadge = `<div class="absolute top-2 left-2 bg-orange-500/95 backdrop-blur-sm px-3 py-2 rounded-lg text-[9px] orbitron font-black text-white shadow-lg animate-pulse">
+                                <div>⏰ ${userPhase.name.toUpperCase()}</div>
+                                <div class="text-[8px] font-normal mt-0.5">${hours}h ${minutes}m ${seconds}s</div>
+                            </div>`;
+                            countdownHTML = `<div class="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center">
+                                <div class="text-orange-400 orbitron text-xs font-bold">Phase Starts In</div>
+                                <div class="text-white orbitron text-2xl font-black mt-1">${hours}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}</div>
+                            </div>`;
                         }
-                    }
-                    
-                    if (whitelistSettings.mintWindowEnd && !windowClosed) {
-                        const endTime = new Date(whitelistSettings.mintWindowEnd).getTime();
-                        if (now > endTime) {
+                        // Check if phase has ended
+                        else if (phaseEndTime && now > phaseEndTime) {
                             buttonClass = 'w-full py-3 bg-red-500/20 border border-red-500/30 text-red-400 cursor-not-allowed';
-                            buttonText = '⏰ Window Closed';
+                            buttonText = '⏰ Phase Ended';
                             buttonDisabled = 'disabled';
-                            windowClosed = true;
+                            statusBadge = `<div class="absolute top-2 left-2 bg-red-500/90 backdrop-blur-sm px-3 py-2 rounded-lg text-[9px] orbitron font-black text-white shadow-lg">🔒 ENDED</div>`;
                         }
-                    }
-                    
-                    if (!windowClosed) {
-                        if (state.address && entry) {
-                            // Whitelisted
-                            if (entry.usedMints >= entry.maxMints) {
-                                // Max reached
-                                buttonClass = 'w-full py-3 bg-gray-500/20 border border-gray-500/30 text-gray-400 cursor-not-allowed';
-                                buttonText = `✓ Max Reached (${entry.maxMints})`;
-                                buttonDisabled = 'disabled';
-                            } else {
-                                // Can mint
-                                buttonText = `🎲 Mint (${entry.usedMints}/${entry.maxMints})`;
-                                statusBadge = '<div class="absolute top-2 left-2 bg-green-500/90 px-2 py-1 rounded text-[8px] orbitron font-black text-black">✓ WHITELISTED</div>';
-                            }
-                        } else if (state.address) {
-                            // Not whitelisted
-                            buttonClass = 'w-full py-3 bg-red-500/20 border border-red-500/30 text-red-400 cursor-not-allowed';
-                            buttonText = '🔒 Not Whitelisted';
+                        // Check if max mints reached
+                        else if (usedMints >= maxMints) {
+                            buttonClass = 'w-full py-3 bg-gray-500/20 border border-gray-500/30 text-gray-400 cursor-not-allowed';
+                            buttonText = `✓ Max Reached (${maxMints})`;
                             buttonDisabled = 'disabled';
-                            statusBadge = '<div class="absolute top-2 left-2 bg-red-500/90 px-2 py-1 rounded text-[8px] orbitron font-black text-white">🔒 WHITELIST ONLY</div>';
+                            statusBadge = `<div class="absolute top-2 left-2 bg-gray-500/90 backdrop-blur-sm px-3 py-2 rounded-lg text-[9px] orbitron font-black text-white shadow-lg">✓ MAXED</div>`;
                         } else {
-                            // Not connected
-                            buttonClass = 'w-full py-3 bg-purple-500/20 border border-purple-500/30 text-purple-400';
-                            buttonText = '🔌 Connect Wallet';
-                            statusBadge = '<div class="absolute top-2 left-2 bg-purple-500/90 px-2 py-1 rounded text-[8px] orbitron font-black text-white">🔒 WHITELIST ACTIVE</div>';
+                            // Can mint
+                            const phasePrice = userPhase.priceKTA || 0;
+                            const priceText = phasePrice === 0 ? 'FREE' : `${phasePrice} KTA`;
+                            buttonText = `🎲 Mint ${priceText} (${usedMints}/${maxMints})`;
+                            statusBadge = `<div class="absolute top-2 left-2 bg-gradient-to-r from-green-500 to-emerald-500 backdrop-blur-sm px-3 py-2 rounded-lg text-[9px] orbitron font-black text-white shadow-lg border border-white/20 animate-pulse">
+                                <div>✓ ${userPhase.name.toUpperCase()}</div>
+                                <div class="text-[10px] font-normal mt-0.5">${priceText}</div>
+                            </div>`;
+                            priceDisplay = `<div class="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/40 rounded-lg p-3 text-center">
+                                <div class="text-green-400 orbitron text-xs font-bold">Your Price</div>
+                                <div class="${phasePrice === 0 ? 'text-green-300' : 'text-white'} orbitron text-3xl font-black mt-1">${phasePrice === 0 ? '🎁 FREE' : `${phasePrice} KTA`}</div>
+                                <div class="text-green-300 fira text-[9px] mt-1">${usedMints}/${maxMints} minted</div>
+                            </div>`;
                         }
+                    } else if (state.address) {
+                        // Not whitelisted
+                        buttonClass = 'w-full py-3 bg-red-500/20 border border-red-500/40 text-red-300 cursor-not-allowed';
+                        buttonText = '🔒 Not Whitelisted';
+                        buttonDisabled = 'disabled';
+                        statusBadge = '<div class="absolute top-2 left-2 bg-red-500/95 backdrop-blur-sm px-3 py-2 rounded-lg text-[9px] orbitron font-black text-white shadow-lg">🔒 WHITELIST ONLY</div>';
+                        cardHoverClass = 'hover:border-red-500/40';
+                    } else {
+                        // Not connected
+                        buttonClass = 'w-full py-3 bg-purple-500/20 border border-purple-500/40 text-purple-300 hover:bg-purple-500/30 transition-all';
+                        buttonText = '🔌 Connect Wallet';
+                        statusBadge = '<div class="absolute top-2 left-2 bg-purple-500/95 backdrop-blur-sm px-3 py-2 rounded-lg text-[9px] orbitron font-black text-white shadow-lg">🔒 WHITELIST ACTIVE</div>';
+                        cardHoverClass = 'hover:border-purple-500/40';
                     }
                 }
                 
                 return `
-                <div class="glass-card p-6 space-y-4 hover:border-cyan-500/20 transition-all group">
-                    <div class="aspect-square bg-gradient-to-br from-purple-900/40 to-cyan-900/40 rounded-xl flex items-center justify-center overflow-hidden border border-cyan-500/30 shadow-[0_0_30px_rgba(0,255,255,0.2)] relative">
+                <div class="glass-card p-6 space-y-4 transition-all duration-300 group ${cardHoverClass}">
+                    <div class="aspect-square bg-gradient-to-br from-purple-900/40 to-cyan-900/40 rounded-xl flex items-center justify-center overflow-hidden border border-cyan-500/30 shadow-[0_0_30px_rgba(0,255,255,0.2)] relative group-hover:shadow-[0_0_50px_rgba(0,255,255,0.4)] transition-all duration-300">
                         ${statusBadge}
                         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDIwIDAgTCAwIDAgMCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDAsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjAuNSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-20"></div>
                         <img src="${DICE_IMAGE_URL}" 
@@ -4021,10 +4092,14 @@
                              alt="Mystery Drop"/>
                     </div>
                     <div>
-                        <h3 class="orbitron text-lg font-bold text-cyan-400">${col.collectionTitle}</h3>
+                        <div class="flex items-center gap-2">
+                            <h3 class="orbitron text-lg font-bold text-cyan-400 group-hover:text-cyan-300 transition-colors">${col.collectionTitle}</h3>
+                            ${col.verified ? '<div class="flex-shrink-0 w-5 h-5 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center border-2 border-white/20 shadow-lg" title="Verified Collection"><svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></div>' : ''}
+                        </div>
                         <p class="fira text-xs text-gray-500 mt-1">${col.collectionDesc}</p>
                     </div>
-                    <div class="flex justify-between items-center">
+                    
+                    ${countdownHTML || priceDisplay || `<div class="flex justify-between items-center">
                         <span class="fira text-sm font-bold ${(() => {
                             const activePhase = state.address ? window.getActivePhaseForWallet(col.collectionId, state.address) : null;
                             const price = activePhase ? activePhase.priceKTA : col.priceKTA;
@@ -4032,13 +4107,12 @@
                         })()}">${(() => {
                             const activePhase = state.address ? window.getActivePhaseForWallet(col.collectionId, state.address) : null;
                             const price = activePhase ? activePhase.priceKTA : col.priceKTA;
-                            const phaseName = activePhase ? ` (${activePhase.name})` : '';
-                            return price === 0 ? 'FREE' : `${price} KTA${phaseName}`;
+                            return price === 0 ? '🎁 FREE' : `${price} KTA`;
                         })()}</span>
                         <span class="fira text-xs text-orange-400">Remaining: ${col.remainingSupply}/${col.totalSupply}</span>
-                    </div>
+                    </div>`}
                     
-                    <!-- FIX #7: Quantity selector for bulk minting -->
+                    <!-- Quantity selector -->
                     <div class="flex items-center gap-2 ${buttonDisabled ? 'opacity-50 pointer-events-none' : ''}">
                         <label class="fira text-xs text-gray-400">Qty:</label>
                         <select id="mintQuantity_${col.collectionId}" class="bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white min-w-[60px]" ${buttonDisabled}>
@@ -4057,6 +4131,9 @@
                 </div>
             `;
             }).join('');
+            
+            // Start countdown timers if any
+            window.startCountdownTimers?.();
         };
 
         window.createBlindMintCollection = async () => {
@@ -4494,7 +4571,14 @@
                         <button onclick="window.cancelListing('${n.id}')" class="flex-1 p-2 rounded-lg border border-red-500/30 text-[8px] orbitron font-bold uppercase text-red-400 hover:bg-red-500/10 transition-all">Cancel</button>
                     </div>
                 ` : `
-                    <button onclick="window.listNFTForSale('${n.id}')" class="w-full mt-3 p-2 rounded-lg border border-cyan-500/30 text-[8px] orbitron font-bold uppercase text-cyan-400 hover:bg-cyan-500/10 transition-all">List for Sale</button>
+                    <div class="grid grid-cols-2 gap-2 mt-3">
+                        <button onclick="window.listNFTForSale('${n.id}')" class="p-2 rounded-lg border border-cyan-500/30 text-[8px] orbitron font-bold uppercase text-cyan-400 hover:bg-cyan-500/10 transition-all">
+                            💰 List for Sale
+                        </button>
+                        <button onclick="window.createAuction('${n.id}')" class="p-2 rounded-lg border border-purple-500/30 text-[8px] orbitron font-bold uppercase text-purple-400 hover:bg-purple-500/10 transition-all">
+                            🎪 Auction
+                        </button>
+                    </div>
                 `;
                 
                 // Enhanced listing status badge
@@ -4685,7 +4769,9 @@
             const floorKTA = ktaListings.length > 0 ? Math.min(...ktaListings.map(n => n.listedPrice)) : null;
             const floorDisplay = floorKTA ? `${floorKTA} KTA` : '—';
             
-            document.getElementById('colPageTitle').innerText = base.collection || base.collectionTitle || base.collectionName || "Protocol Node";
+            const collectionTitle = base.collection || base.collectionTitle || base.collectionName || "Protocol Node";
+            const verifiedBadge = base.verified ? '<span class="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full border-2 border-white/20 shadow-lg ml-3" title="Verified Collection"><svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></span>' : '';
+            document.getElementById('colPageTitle').innerHTML = collectionTitle + verifiedBadge;
             document.getElementById('colPageDesc').innerText = base.collectionDesc || "Description encrypted.";
             document.getElementById('colPageCreator').innerText = (base.creator || "---").substring(0, 24) + "...";
             document.getElementById('colPageSupply').innerText = colNfts.length;
@@ -6391,40 +6477,41 @@
         // Load whitelist settings for collection
         window.loadWhitelistSettings = async (collectionId) => {
             try {
+                console.log(`🔍 Loading whitelist settings for: ${collectionId}`);
                 const settingsRef = doc(db, 'whitelistSettings', collectionId);
                 const snap = await getDoc(settingsRef);
                 
                 if (snap.exists()) {
                     const data = snap.data();
+                    console.log(`✅ Whitelist settings found:`, data);
+                    console.log(`📊 Phases in settings:`, data.phases);
                     state.whitelistSettings[collectionId] = data;
                     
                     // Populate UI
                     document.getElementById('whitelistEnabled').checked = data.enabled || false;
-                    document.getElementById('whitelistMode').value = data.mode || 'BLIND_MINT';
-                    document.getElementById('whitelistDefaultMax').value = data.defaultMaxMints || 1;
-                    
-                    if (data.mintWindowStart) {
-                        const start = new Date(data.mintWindowStart);
-                        document.getElementById('whitelistStart').value = start.toISOString().slice(0, 16);
-                    }
-                    if (data.mintWindowEnd) {
-                        const end = new Date(data.mintWindowEnd);
-                        document.getElementById('whitelistEnd').value = end.toISOString().slice(0, 16);
-                    }
                     
                     // Load phases
                     if (data.phases && Array.isArray(data.phases)) {
+                        console.log(`✅ Loading ${data.phases.length} phases into UI`);
                         window.whitelistPhases = data.phases;
+                        window.renderWhitelistPhases();
+                    } else {
+                        console.log(`⚠️ No phases found in settings`);
+                        window.whitelistPhases = [];
                         window.renderWhitelistPhases();
                     }
                     
                     window.toggleWhitelistSettingsUI?.();
                 } else {
-                    state.whitelistSettings[collectionId] = { enabled: false, wallets: [] };
+                    console.log(`⚠️ No whitelist settings found for ${collectionId}`);
+                    state.whitelistSettings[collectionId] = { enabled: false, phases: [] };
+                    document.getElementById('whitelistEnabled').checked = false;
+                    window.whitelistPhases = [];
+                    window.renderWhitelistPhases();
+                    window.toggleWhitelistSettingsUI?.();
                 }
                 
-                // Load wallets
-                await window.loadWhitelistWallets(collectionId);
+                console.log(`📊 State after loading:`, state.whitelistSettings[collectionId]);
                 
             } catch (error) {
                 console.error("Error loading whitelist settings:", error);
@@ -6530,9 +6617,15 @@
         
         // Clear all whitelist wallets
         window.clearWhitelist = async () => {
-            if (!confirm('⚠️ Clear all whitelisted wallets?\n\nThis cannot be undone.')) {
-                return;
-            }
+            const confirmed = await window.showCustomConfirm({
+                icon: '⚠️',
+                title: 'Clear All Wallets',
+                message: 'Clear all whitelisted wallets?\n\nThis cannot be undone.',
+                confirmText: '🗑️ Yes, Clear All',
+                danger: true
+            });
+            
+            if (!confirmed) return;
             
             const currentCollection = state.collections.find(c => c.blindMintEnabled);
             if (!currentCollection) return;
@@ -6664,6 +6757,25 @@
         // WHITELIST PHASES WITH CUSTOM PRICING
         // ═══════════════════════════════════════════════════════════════════
         
+        // Populate whitelist collection selector dropdown
+        window.populateWhitelistCollections = () => {
+            const selector = document.getElementById('whitelistCollectionSelector');
+            if (!selector) return;
+            
+            // Keep the placeholder
+            selector.innerHTML = '<option value="">-- Select a Collection --</option>';
+            
+            // Add all collections
+            state.collections.forEach(col => {
+                const option = document.createElement('option');
+                option.value = col.id;
+                option.textContent = col.collectionTitle || col.name || col.id;
+                selector.appendChild(option);
+            });
+            
+            console.log(`✅ Populated whitelist dropdown with ${state.collections.length} collections`);
+        };
+        
         window.whitelistPhases = [];
         
         window.addWhitelistPhase = () => {
@@ -6695,75 +6807,104 @@
             
             if (window.whitelistPhases.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-4 text-gray-600 fira text-xs">
-                        No phases added yet. Click "+ Add Phase" to create one.
+                    <div class="text-center py-8 text-gray-500 fira text-sm border-2 border-dashed border-gray-700 rounded-xl">
+                        <div class="text-4xl mb-2">📋</div>
+                        <div>No phases added yet</div>
+                        <div class="text-xs mt-1">Click "+ Add Phase" above to create your first whitelist phase</div>
                     </div>
                 `;
                 return;
             }
             
             container.innerHTML = window.whitelistPhases.map((phase, index) => `
-                <div class="bg-black/40 p-4 rounded-lg border border-purple-500/20 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <input type="text" value="${phase.name}" 
-                               onchange="window.whitelistPhases[${index}].name = this.value"
-                               class="bg-transparent text-purple-400 orbitron text-sm font-bold outline-none">
+                <div class="bg-gradient-to-br from-purple-900/20 to-pink-900/20 p-5 rounded-xl border-2 border-purple-500/30 space-y-4 hover:border-purple-500/50 transition-all">
+                    <!-- Phase Header -->
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <label class="block text-[9px] fira text-purple-400 uppercase font-bold mb-1">Phase Name</label>
+                            <input type="text" value="${phase.name}" 
+                                   onchange="window.whitelistPhases[${index}].name = this.value"
+                                   class="w-full bg-black/60 border-2 border-purple-500/30 rounded-lg px-3 py-2 text-white orbitron text-sm font-bold outline-none focus:border-purple-500">
+                        </div>
                         <button onclick="window.removeWhitelistPhase('${phase.id}')" 
-                                class="text-red-400 hover:text-red-300 text-xs">
+                                class="ml-3 px-3 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 hover:bg-red-500/30 transition-all text-xs orbitron font-bold">
                             ✕ Remove
                         </button>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-3">
+                    <!-- Pricing & Limits -->
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[8px] fira text-gray-500 mb-1">Price (KTA)</label>
+                            <label class="block text-[9px] fira text-gray-400 uppercase font-bold mb-2">💰 Price (KTA)</label>
                             <input type="number" value="${phase.priceKTA}" step="0.1" min="0"
                                    onchange="window.whitelistPhases[${index}].priceKTA = parseFloat(this.value)"
-                                   class="w-full bg-black/60 border border-purple-500/20 rounded px-3 py-2 text-white fira text-xs outline-none">
+                                   class="w-full bg-black/60 border-2 border-cyan-500/30 rounded-lg px-3 py-2 text-white fira text-sm outline-none focus:border-cyan-500">
+                            <p class="text-[9px] text-gray-600 mt-1">${phase.priceKTA === 0 ? '🎁 Free mint!' : `${phase.priceKTA} KTA per NFT`}</p>
                         </div>
                         <div>
-                            <label class="block text-[8px] fira text-gray-500 mb-1">Max Mints</label>
-                            <input type="number" value="${phase.maxMintsPerWallet}" min="1" max="10"
+                            <label class="block text-[9px] fira text-gray-400 uppercase font-bold mb-2">🎯 Max Mints per Wallet</label>
+                            <input type="number" value="${phase.maxMintsPerWallet}" min="1" max="100"
                                    onchange="window.whitelistPhases[${index}].maxMintsPerWallet = parseInt(this.value)"
-                                   class="w-full bg-black/60 border border-purple-500/20 rounded px-3 py-2 text-white fira text-xs outline-none">
+                                   class="w-full bg-black/60 border-2 border-orange-500/30 rounded-lg px-3 py-2 text-white fira text-sm outline-none focus:border-orange-500">
+                            <p class="text-[9px] text-gray-600 mt-1">Each wallet can mint ${phase.maxMintsPerWallet} time${phase.maxMintsPerWallet > 1 ? 's' : ''}</p>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[8px] fira text-gray-500 mb-1">Start Time</label>
-                            <input type="datetime-local" 
-                                   value="${phase.startTime ? new Date(phase.startTime).toISOString().slice(0, 16) : ''}"
-                                   onchange="window.whitelistPhases[${index}].startTime = this.value ? new Date(this.value).toISOString() : null"
-                                   class="w-full bg-black/60 border border-purple-500/20 rounded px-2 py-2 text-white fira text-[10px] outline-none">
+                    <!-- Time Window (Optional) -->
+                    <div class="bg-black/40 p-4 rounded-lg border border-white/5">
+                        <div class="text-[9px] fira text-gray-400 uppercase font-bold mb-3">⏰ Time Window (Optional)</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[9px] fira text-gray-500 mb-1">Start Time</label>
+                                <input type="datetime-local" 
+                                       value="${phase.startTime ? new Date(phase.startTime).toISOString().slice(0, 16) : ''}"
+                                       onchange="window.whitelistPhases[${index}].startTime = this.value ? new Date(this.value).toISOString() : null"
+                                       class="w-full bg-black/60 border border-green-500/30 rounded px-3 py-2 text-white fira text-[11px] outline-none focus:border-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] fira text-gray-500 mb-1">End Time</label>
+                                <input type="datetime-local"
+                                       value="${phase.endTime ? new Date(phase.endTime).toISOString().slice(0, 16) : ''}"
+                                       onchange="window.whitelistPhases[${index}].endTime = this.value ? new Date(this.value).toISOString() : null"
+                                       class="w-full bg-black/60 border border-red-500/30 rounded px-3 py-2 text-white fira text-[11px] outline-none focus:border-red-500">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-[8px] fira text-gray-500 mb-1">End Time</label>
-                            <input type="datetime-local"
-                                   value="${phase.endTime ? new Date(phase.endTime).toISOString().slice(0, 16) : ''}"
-                                   onchange="window.whitelistPhases[${index}].endTime = this.value ? new Date(this.value).toISOString() : null"
-                                   class="w-full bg-black/60 border border-purple-500/20 rounded px-2 py-2 text-white fira text-[10px] outline-none">
-                        </div>
+                        <p class="text-[9px] text-gray-600 mt-2">💡 Leave empty for no time restrictions</p>
                     </div>
                     
+                    <!-- Wallets -->
                     <div>
-                        <label class="block text-[8px] fira text-gray-500 mb-1">Wallets (comma-separated)</label>
+                        <label class="block text-[9px] fira text-gray-400 uppercase font-bold mb-2">👥 Whitelisted Wallets</label>
                         <textarea 
-                            onchange="window.whitelistPhases[${index}].wallets = this.value.split(',').map(w => w.trim()).filter(Boolean)"
-                            class="w-full bg-black/60 border border-purple-500/20 rounded px-3 py-2 text-white fira text-[10px] outline-none font-mono resize-none"
-                            rows="2"
-                            placeholder="keeta_abc..., keeta_def...">${phase.wallets.join(', ')}</textarea>
-                        <p class="text-[9px] fira text-gray-600 mt-1">${phase.wallets.length} wallets in this phase</p>
+                            oninput="window.whitelistPhases[${index}].wallets = this.value.split(',').map(w => w.trim()).filter(Boolean)"
+                            class="w-full bg-black/60 border-2 border-purple-500/30 rounded-lg px-3 py-3 text-white fira text-[11px] outline-none font-mono resize-none focus:border-purple-500"
+                            rows="4"
+                            placeholder="keeta_abc123..., keeta_def456..., keeta_ghi789...">${phase.wallets.join(', ')}</textarea>
+                        <div class="flex justify-between items-center mt-2">
+                            <p class="text-[9px] fira ${phase.wallets.length > 0 ? 'text-green-400' : 'text-gray-600'}">
+                                ${phase.wallets.length > 0 ? `✓ ${phase.wallets.length} wallet${phase.wallets.length > 1 ? 's' : ''} in this phase` : 'No wallets added yet'}
+                            </p>
+                            ${phase.wallets.length > 0 ? `<button onclick="navigator.clipboard.writeText('${phase.wallets.join(', ')}'); window.notify('Copied to clipboard!', 'success')" class="text-xs text-cyan-400 hover:text-cyan-300">📋 Copy</button>` : ''}
+                        </div>
                     </div>
                 </div>
             `).join('');
         };
         
         window.getActivePhaseForWallet = (collectionId, walletAddress) => {
-            // Strip 'collection_' prefix if present to match stored settings
+            // Try BOTH with and without collection_ prefix (Firebase keys are inconsistent)
             const cleanCollectionId = collectionId?.replace?.(/^collection_/, '') || collectionId;
             
-            const settings = state.whitelistSettings[cleanCollectionId];
+            console.log(`💎 getActivePhaseForWallet called:`);
+            console.log(`   - Original ID: ${collectionId}`);
+            console.log(`   - Clean ID: ${cleanCollectionId}`);
+            console.log(`   - Wallet: ${walletAddress}`);
+            console.log(`   - Settings keys:`, Object.keys(state.whitelistSettings));
+            
+            // Try both possible keys (with and without collection_ prefix)
+            const settings = state.whitelistSettings[cleanCollectionId] || state.whitelistSettings[collectionId];
+            console.log(`   - Settings found:`, settings);
+            
             if (!settings?.phases || settings.phases.length === 0) {
                 console.log(`💎 No phases configured for collection: ${collectionId}`);
                 return null;
@@ -6819,33 +6960,301 @@
         };
 
         window.saveWhitelistSettings = async () => {
-            const currentCollection = state.collections.find(c => c.blindMintEnabled);
-            if (!currentCollection) {
-                return window.notify("No active collection", "error");
+            const selectedCollectionId = document.getElementById('whitelistCollectionSelector').value;
+            if (!selectedCollectionId) {
+                return window.notify("Please select a collection first", "error");
+            }
+            
+            const isEnabled = document.getElementById('whitelistEnabled').checked;
+            
+            if (!isEnabled) {
+                // If disabled, just save that it's disabled
+                try {
+                    const settings = {
+                        collectionId: selectedCollectionId,
+                        enabled: false,
+                        phases: [],
+                        updatedAt: new Date().toISOString()
+                    };
+                    
+                    const settingsRef = doc(db, 'whitelistSettings', selectedCollectionId);
+                    await setDoc(settingsRef, settings, { merge: true });
+                    state.whitelistSettings[selectedCollectionId] = settings;
+                    
+                    window.notify("✅ Whitelist disabled for this collection", "success");
+                    
+                    // Reload collections to update UI cards
+                    await window.loadCollections();
+                    return;
+                } catch (error) {
+                    console.error("Error saving whitelist settings:", error);
+                    window.notify("Failed to save settings", "error");
+                    return;
+                }
+            }
+            
+            // If enabled, validate phases
+            if (!window.whitelistPhases || window.whitelistPhases.length === 0) {
+                return window.notify("⚠️ Please add at least one phase with wallets", "error");
+            }
+            
+            // Validate each phase has wallets
+            const emptyPhases = window.whitelistPhases.filter(p => !p.wallets || p.wallets.length === 0);
+            if (emptyPhases.length > 0) {
+                return window.notify(`⚠️ Phase "${emptyPhases[0].name}" has no wallets. Add wallet addresses or remove the phase.`, "error");
             }
             
             try {
                 const settings = {
-                    collectionId: currentCollection.collectionId,
-                    enabled: document.getElementById('whitelistEnabled').checked,
-                    mode: document.getElementById('whitelistMode').value,
-                    defaultMaxMints: parseInt(document.getElementById('whitelistDefaultMax').value) || 1,
-                    mintWindowStart: document.getElementById('whitelistStart').value ? new Date(document.getElementById('whitelistStart').value).toISOString() : null,
-                    mintWindowEnd: document.getElementById('whitelistEnd').value ? new Date(document.getElementById('whitelistEnd').value).toISOString() : null,
-                    phases: window.whitelistPhases, // Save phases with custom pricing
+                    collectionId: selectedCollectionId,
+                    enabled: true,
+                    phases: window.whitelistPhases,
                     updatedAt: new Date().toISOString()
                 };
                 
-                const settingsRef = doc(db, 'whitelistSettings', currentCollection.collectionId);
+                console.log("💾 Saving whitelist settings:", settings);
+                console.log("📋 Phases being saved:", settings.phases);
+                
+                // Detailed phase logging
+                settings.phases.forEach((phase, i) => {
+                    console.log(`   Phase ${i + 1}: "${phase.name}"`);
+                    console.log(`      Price: ${phase.priceKTA} KTA`);
+                    console.log(`      Wallets: ${phase.wallets.length}`);
+                    phase.wallets.forEach(w => console.log(`         - ${w}`));
+                });
+                
+                const settingsRef = doc(db, 'whitelistSettings', selectedCollectionId);
                 await setDoc(settingsRef, settings, { merge: true });
                 
-                state.whitelistSettings[currentCollection.collectionId] = settings;
+                state.whitelistSettings[selectedCollectionId] = settings;
                 
-                window.notify("✅ Whitelist settings saved", "success");
+                const totalWallets = settings.phases.reduce((sum, p) => sum + p.wallets.length, 0);
+                window.notify(`✅ Whitelist saved!\n${settings.phases.length} phases, ${totalWallets} wallets`, "success");
+                console.log(`✅ Saved to Firebase: whitelistSettings/${selectedCollectionId}`);
+                
+                // Reload collections to update UI cards
+                await window.loadCollections();
+                
+                // Refresh My Whitelists
+                window.refreshMyWhitelists();
                 
             } catch (error) {
                 console.error("Error saving whitelist settings:", error);
                 window.notify("Failed to save settings", "error");
+            }
+        };
+        
+        // Render My Whitelists
+        window.renderMyWhitelists = () => {
+            console.log("🔍 renderMyWhitelists called");
+            const container = document.getElementById('myWhitelistsContainer');
+            if (!container) {
+                console.warn("❌ myWhitelistsContainer not found in DOM");
+                return;
+            }
+            
+            console.log("📊 state.collections:", state.collections?.length || 0);
+            console.log("📊 state.whitelistSettings:", Object.keys(state.whitelistSettings || {}).length);
+            
+            // Wait for collections to be loaded
+            if (!state.collections || state.collections.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-600 fira text-sm">
+                        Loading collections...
+                    </div>
+                `;
+                console.log("⏳ Waiting for collections to load");
+                return;
+            }
+            
+            // Wait for whitelist settings to be loaded
+            if (!state.whitelistSettings || Object.keys(state.whitelistSettings).length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 border-2 border-dashed border-gray-700 rounded-xl">
+                        <div class="text-4xl mb-2">📝</div>
+                        <div class="text-gray-500 fira text-sm">No active whitelists yet</div>
+                        <div class="text-gray-600 fira text-xs mt-1">Configure one below!</div>
+                    </div>
+                `;
+                console.log("ℹ️ No whitelist settings found");
+                return;
+            }
+            
+            const activeWhitelists = Object.entries(state.whitelistSettings)
+                .filter(([_, settings]) => settings.enabled)
+                .map(([collectionId, settings]) => {
+                    const collection = state.collections.find(c => c.collectionId === collectionId);
+                    return { collectionId, settings, collection };
+                })
+                .filter(w => w.collection);
+            
+            console.log("✅ Found", activeWhitelists.length, "active whitelists");
+            
+            if (activeWhitelists.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 border-2 border-dashed border-gray-700 rounded-xl">
+                        <div class="text-4xl mb-2">📝</div>
+                        <div class="text-gray-500 fira text-sm">No active whitelists yet</div>
+                        <div class="text-gray-600 fira text-xs mt-1">Configure one below to get started!</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = activeWhitelists.map(({ collectionId, settings, collection }) => {
+                const totalWallets = settings.phases.reduce((sum, p) => sum + p.wallets.length, 0);
+                const phaseCount = settings.phases.length;
+                
+                return `
+                    <div class="bg-gradient-to-r from-cyan-900/20 to-purple-900/20 p-5 rounded-xl border-2 border-cyan-500/30 hover:border-cyan-500/50 transition-all">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h5 class="orbitron text-sm text-cyan-400 font-bold">${collection.collectionTitle}</h5>
+                                    <span class="bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-[8px] orbitron font-bold">ACTIVE</span>
+                                </div>
+                                <div class="flex gap-4 mt-2">
+                                    <div class="text-xs">
+                                        <span class="text-gray-500 fira">Phases:</span>
+                                        <span class="text-white fira font-bold ml-1">${phaseCount}</span>
+                                    </div>
+                                    <div class="text-xs">
+                                        <span class="text-gray-500 fira">Total Wallets:</span>
+                                        <span class="text-white fira font-bold ml-1">${totalWallets}</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3 space-y-1">
+                                    ${settings.phases.map(phase => `
+                                        <div class="flex items-center gap-2 text-[10px]">
+                                            <span class="text-purple-400 orbitron font-bold">${phase.name}:</span>
+                                            <span class="text-${phase.priceKTA === 0 ? 'green' : 'cyan'}-400">${phase.priceKTA === 0 ? '🎁 FREE' : `${phase.priceKTA} KTA`}</span>
+                                            <span class="text-gray-500">•</span>
+                                            <span class="text-gray-400">${phase.wallets.length} wallets</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="flex gap-2 ml-4">
+                                <button onclick="window.loadWhitelistSettings('${collectionId}'); document.getElementById('whitelistCollectionSelector').value='${collectionId}'" 
+                                        class="px-3 py-2 bg-cyan-500/20 border border-cyan-500/30 rounded-lg text-cyan-400 hover:bg-cyan-500/30 transition-all text-xs orbitron font-bold">
+                                    ✏️ Edit
+                                </button>
+                                <button onclick="window.cancelWhitelist('${collectionId}')" 
+                                        class="px-3 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 hover:bg-red-500/30 transition-all text-xs orbitron font-bold">
+                                    🗑️ Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            console.log("✅ My Whitelists rendered successfully");
+        };
+        
+        // Refresh My Whitelists
+        window.refreshMyWhitelists = async () => {
+            if (!db) return;
+            try {
+                const settingsRef = collection(db, 'whitelistSettings');
+                const snapshot = await getDocs(settingsRef);
+                
+                state.whitelistSettings = {};
+                snapshot.forEach(doc => {
+                    state.whitelistSettings[doc.id] = doc.data();
+                });
+                
+                window.renderMyWhitelists();
+            } catch (error) {
+                console.error("Error refreshing whitelists:", error);
+            }
+        };
+        
+        // Custom confirmation modal
+        window.showCustomConfirm = (options) => {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const icon = document.getElementById('confirmModalIcon');
+                const title = document.getElementById('confirmModalTitle');
+                const message = document.getElementById('confirmModalMessage');
+                const confirmBtn = document.getElementById('confirmModalConfirm');
+                const cancelBtn = document.getElementById('confirmModalCancel');
+                
+                // Set content
+                icon.textContent = options.icon || '⚠️';
+                title.textContent = options.title || 'Confirm Action';
+                message.textContent = options.message || 'Are you sure you want to proceed?';
+                confirmBtn.textContent = options.confirmText || 'Confirm';
+                
+                // Set button style based on danger level
+                if (options.danger) {
+                    confirmBtn.className = 'w-full py-4 rounded-xl bg-red-500/20 border-2 border-red-500/50 text-red-400 hover:bg-red-500/30 orbitron font-bold text-sm transition-all';
+                } else {
+                    confirmBtn.className = 'w-full py-4 rounded-xl bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/30 orbitron font-bold text-sm transition-all';
+                }
+                
+                // Show modal
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                
+                // Handle clicks
+                const handleConfirm = () => {
+                    cleanup();
+                    resolve(true);
+                };
+                
+                const handleCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+                
+                const handleEscape = (e) => {
+                    if (e.key === 'Escape') {
+                        handleCancel();
+                    }
+                };
+                
+                const cleanup = () => {
+                    modal.classList.remove('flex');
+                    modal.classList.add('hidden');
+                    confirmBtn.removeEventListener('click', handleConfirm);
+                    cancelBtn.removeEventListener('click', handleCancel);
+                    document.removeEventListener('keydown', handleEscape);
+                };
+                
+                confirmBtn.addEventListener('click', handleConfirm);
+                cancelBtn.addEventListener('click', handleCancel);
+                document.addEventListener('keydown', handleEscape);
+            });
+        };
+        
+        // Cancel/Disable whitelist
+        window.cancelWhitelist = async (collectionId) => {
+            const collection = state.collections.find(c => c.collectionId === collectionId);
+            const collectionName = collection?.collectionTitle || 'this collection';
+            
+            const confirmed = await window.showCustomConfirm({
+                icon: '🗑️',
+                title: 'Cancel Whitelist',
+                message: `Are you sure you want to cancel the whitelist for "${collectionName}"?\n\nThis will disable whitelist access but keep the phases saved. You can re-enable it later.`,
+                confirmText: '🗑️ Yes, Cancel Whitelist',
+                danger: true
+            });
+            
+            if (!confirmed) return;
+            
+            try {
+                const settingsRef = doc(db, 'whitelistSettings', collectionId);
+                await setDoc(settingsRef, { enabled: false }, { merge: true });
+                
+                state.whitelistSettings[collectionId].enabled = false;
+                
+                window.notify("✅ Whitelist cancelled and disabled", "success");
+                window.refreshMyWhitelists();
+                await window.loadCollections();
+            } catch (error) {
+                console.error("Error cancelling whitelist:", error);
+                window.notify("Failed to cancel whitelist", "error");
             }
         };
         
@@ -7340,7 +7749,8 @@
                 await Promise.all([
                     window.loadNFTsFromFirebase(),
                     window.loadCollections(),
-                    window.loadTraitCounts()
+                    window.loadTraitCounts(),
+                    window.refreshMyWhitelists()
                 ]);
                 
                 // Recalculate trait counts for all collections to ensure rarity is accurate
@@ -7399,6 +7809,9 @@
             if (priceInput) priceInput.addEventListener('input', window.updateFeeBreakdown);
             const currencyInputs = document.querySelectorAll('input[name="listingCurrency"]');
             currencyInputs.forEach(input => input.addEventListener('change', window.updateFeeBreakdown));
+            
+            // Setup verification panel
+            window.setupVerificationPanel();
             
             // FIX #6: ULTRA-SAFE Auto-restore - Wait for KeetaNet AND strict validation
             setTimeout(async () => {
@@ -8064,12 +8477,25 @@
             }
 
             async checkWhitelist(collectionId, userWallet) {
-                const walletsRef = collection(this.db, 'whitelistWallets');
-                const q = query(walletsRef, where('collectionId', '==', collectionId), where('walletAddress', '==', userWallet));
-                const snap = await getDocs(q);
-                if (snap.empty) return false;
-                const entry = snap.docs[0].data();
-                return (entry.usedMints || 0) < (entry.maxMints || 1);
+                // Use NEW phase-based whitelist system
+                const activePhase = window.getActivePhaseForWallet(collectionId, userWallet);
+                if (!activePhase) {
+                    console.log(`❌ Wallet not in any phase for collection ${collectionId}`);
+                    return false;
+                }
+                
+                // Check if user has reached max mints for their phase
+                const maxMints = activePhase.maxMintsPerWallet || 1;
+                const walletTracking = state.walletMintTracking?.[collectionId]?.[userWallet];
+                const usedMints = walletTracking?.count || 0;
+                
+                if (usedMints >= maxMints) {
+                    console.log(`❌ Wallet has reached max mints (${usedMints}/${maxMints})`);
+                    return false;
+                }
+                
+                console.log(`✅ Whitelist check passed: Phase "${activePhase.name}", ${usedMints}/${maxMints} mints used`);
+                return true;
             }
 
             async getKTABalance(walletAddress) {
@@ -8786,7 +9212,15 @@
                 return window.notify("You don't own this NFT", "error");
             }
             
-            if (!confirm(`Accept offer of ${offer.amount} ${offer.currency} for ${nft.name}?`)) return;
+            const confirmed = await window.showCustomConfirm({
+                icon: '💰',
+                title: 'Accept Offer',
+                message: `Accept offer of ${offer.amount} ${offer.currency} for ${nft.name}?\n\nThe NFT will be transferred to the buyer and you will receive the payment.`,
+                confirmText: '✅ Accept Offer',
+                danger: false
+            });
+            
+            if (!confirmed) return;
             
             try {
                 window.notify("Processing offer acceptance...", "success");
@@ -9213,6 +9647,778 @@
             }
         };
 
+        // ═══════════════════════════════════════════════════════════════════
+        // AUCTION SYSTEM
+        // ═══════════════════════════════════════════════════════════════════
+        
+        // Load active auctions
+        window.loadAuctions = async () => {
+            console.log("🎪 Loading auctions...");
+            
+            try {
+                const auctionsQuery = query(
+                    collection(db, 'auctions'),
+                    where('status', '==', 'active'),
+                    orderBy('endTime', 'asc')
+                );
+                
+                const snapshot = await getDocs(auctionsQuery);
+                state.auctions = [];
+                
+                snapshot.forEach(doc => {
+                    state.auctions.push({ id: doc.id, ...doc.data() });
+                });
+                
+                console.log(`✅ Loaded ${state.auctions.length} active auctions`);
+                
+                // Load user's bids if connected
+                if (state.address) {
+                    await window.loadMyBids();
+                }
+                
+            } catch (error) {
+                console.error("❌ Error loading auctions:", error);
+            }
+        };
+        
+        // Load user's bids
+        window.loadMyBids = async () => {
+            if (!state.address) return;
+            
+            try {
+                const bidsQuery = query(
+                    collection(db, 'bids'),
+                    where('bidder', '==', state.address),
+                    orderBy('timestamp', 'desc')
+                );
+                
+                const snapshot = await getDocs(bidsQuery);
+                state.myBids = [];
+                
+                snapshot.forEach(doc => {
+                    state.myBids.push({ id: doc.id, ...doc.data() });
+                });
+                
+                console.log(`✅ Loaded ${state.myBids.length} of my bids`);
+                
+            } catch (error) {
+                console.error("❌ Error loading bids:", error);
+            }
+        };
+        
+        // Render auctions grid
+        window.renderAuctions = () => {
+            const grid = document.getElementById('auctionsGrid');
+            if (!grid) return;
+            
+            if (state.auctions.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500 fira text-sm">No active auctions</div>';
+                return;
+            }
+            
+            grid.innerHTML = state.auctions.map(auction => {
+                const timeLeft = window.getTimeRemaining(auction.endTime);
+                const isEnded = new Date(auction.endTime) <= new Date();
+                const imgUrl = `https://gateway.pinata.cloud/ipfs/${auction.nftImage}`;
+                const isMyAuction = auction.seller === state.address;
+                const isHighestBidder = auction.highestBidder === state.address;
+                
+                return `
+                    <div class="glass-card overflow-hidden hover:border-cyan-500/40 transition-all">
+                        <div class="relative aspect-square bg-gradient-to-br from-purple-900/40 to-cyan-900/40">
+                            ${isMyAuction ? '<div class="absolute top-2 right-2 bg-purple-500/90 px-2 py-1 rounded text-[9px] orbitron font-bold text-white">YOUR AUCTION</div>' : ''}
+                            ${isHighestBidder ? '<div class="absolute top-2 right-2 bg-green-500/90 px-2 py-1 rounded text-[9px] orbitron font-bold text-white">HIGHEST BID</div>' : ''}
+                            <img src="${imgUrl}" class="w-full h-full object-cover" alt="${auction.nftName}">
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div>
+                                <h4 class="orbitron text-sm font-bold text-white">${auction.nftName}</h4>
+                                <div class="text-xs text-gray-500 mt-1">${auction.bidCount} bid${auction.bidCount !== 1 ? 's' : ''}</div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <div>
+                                    <div class="text-xs text-gray-500">Current Bid</div>
+                                    <div class="text-xl font-bold text-cyan-400">${auction.currentBid} KTA</div>
+                                </div>
+                                ${auction.reservePrice > 0 ? `
+                                <div>
+                                    <div class="text-xs text-gray-500">Reserve Price</div>
+                                    <div class="text-sm text-purple-400">${auction.reservePrice} KTA</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="bg-black/40 p-3 rounded-lg border border-white/5">
+                                <div class="text-[10px] text-gray-500 uppercase">Time ${isEnded ? 'Ended' : 'Remaining'}</div>
+                                <div class="text-lg font-bold ${isEnded ? 'text-red-400' : 'text-cyan-400'} orbitron">${timeLeft}</div>
+                            </div>
+                            
+                            ${!isEnded && !isMyAuction ? `
+                                <button onclick="window.placeBid('${auction.id}')" class="btn-primary w-full py-2 text-sm">
+                                    💎 Place Bid
+                                </button>
+                            ` : isMyAuction ? `
+                                <div class="text-xs text-center text-gray-500">Your auction</div>
+                                ${auction.bidCount === 0 ? `
+                                    <button onclick="window.cancelAuction('${auction.id}')" class="w-full p-2 border border-red-500/30 text-red-400 rounded text-xs hover:bg-red-500/20 transition-all">
+                                        Cancel Auction
+                                    </button>
+                                ` : ''}
+                            ` : `
+                                <div class="text-sm text-center text-red-400">Auction Ended</div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+        
+        // Get time remaining
+        window.getTimeRemaining = (endTime) => {
+            const now = new Date();
+            const end = new Date(endTime);
+            const diff = end - now;
+            
+            if (diff <= 0) return 'Ended';
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            if (days > 0) return `${days}d ${hours}h`;
+            if (hours > 0) return `${hours}h ${minutes}m`;
+            if (minutes > 0) return `${minutes}m ${seconds}s`;
+            return `${seconds}s`;
+        };
+        
+        // Create auction - show modal
+        window.createAuction = async (nftId) => {
+            if (!state.address) return window.notify("Connect wallet first", "error");
+            
+            const nft = state.nfts.find(n => n.id === nftId);
+            if (!nft) return window.notify("NFT not found", "error");
+            
+            if (nft.owner !== state.address) return window.notify("You don't own this NFT", "error");
+            
+            // Show auction creation modal
+            window.showAuctionModal(nft);
+        };
+        
+        // Show auction modal
+        window.showAuctionModal = (nft) => {
+            const modal = document.createElement('div');
+            modal.id = 'auctionModal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-view';
+            modal.innerHTML = `
+                <div class="glass-card p-8 max-w-2xl w-full space-y-6 border-2 border-cyan-500/30">
+                    <h3 class="orbitron text-2xl text-cyan-400 font-bold uppercase">🎪 Create Auction</h3>
+                    
+                    <div class="flex gap-6">
+                        <img src="https://gateway.pinata.cloud/ipfs/${window.getNFTImagePath(nft)}" 
+                             class="w-48 h-48 rounded-lg object-cover border-2 border-white/10">
+                        <div class="flex-1 space-y-4">
+                            <div>
+                                <label class="block text-xs orbitron text-gray-400 uppercase mb-2">NFT</label>
+                                <div class="text-lg font-bold text-white">${nft.name}</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs orbitron text-gray-400 uppercase mb-2">Starting Bid (KTA)</label>
+                                <input type="number" id="auctionStartingBid" value="1" min="0.1" step="0.1"
+                                       class="w-full bg-black/60 border-2 border-cyan-500/30 p-3 rounded-lg text-white outline-none focus:border-cyan-500">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs orbitron text-gray-400 uppercase mb-2">Reserve Price (Optional)</label>
+                                <input type="number" id="auctionReservePrice" placeholder="Minimum to sell" min="0" step="0.1"
+                                       class="w-full bg-black/60 border-2 border-purple-500/30 p-3 rounded-lg text-white outline-none focus:border-purple-500">
+                                <div class="text-[10px] text-gray-600 mt-1">Auction won't complete if reserve not met</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs orbitron text-gray-400 uppercase mb-2">Duration</label>
+                                <select id="auctionDuration" class="w-full bg-black/60 border-2 border-cyan-500/30 p-3 rounded-lg text-white outline-none">
+                                    <option value="3600">1 Hour</option>
+                                    <option value="21600">6 Hours</option>
+                                    <option value="86400" selected>24 Hours</option>
+                                    <option value="259200">3 Days</option>
+                                    <option value="604800">7 Days</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-900/20 border-2 border-yellow-500/30 p-4 rounded-lg">
+                        <div class="text-sm text-yellow-400 font-bold mb-2">⚠️ Important</div>
+                        <div class="text-xs text-gray-400 space-y-1">
+                            <div>• NFT will be locked in auction until it ends</div>
+                            <div>• 3% marketplace fee deducted from winning bid</div>
+                            <div>• Winning bidder pays automatically when auction ends</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="document.getElementById('auctionModal').remove()" 
+                                class="flex-1 p-3 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 transition-all">
+                            Cancel
+                        </button>
+                        <button onclick="window.confirmCreateAuction('${nft.id}')" 
+                                class="flex-1 btn-primary p-3">
+                            🎪 Start Auction
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        };
+        
+        // Confirm create auction
+        window.confirmCreateAuction = async (nftId) => {
+            const startingBid = parseFloat(document.getElementById('auctionStartingBid')?.value || 0);
+            const reservePrice = parseFloat(document.getElementById('auctionReservePrice')?.value || 0);
+            const duration = parseInt(document.getElementById('auctionDuration')?.value || 86400);
+            
+            if (startingBid <= 0) return window.notify("Invalid starting bid", "error");
+            if (reservePrice > 0 && reservePrice < startingBid) {
+                return window.notify("Reserve must be >= starting bid", "error");
+            }
+            
+            try {
+                window.notify("Creating auction...", "success");
+                
+                const nft = state.nfts.find(n => n.id === nftId);
+                const endTime = new Date(Date.now() + (duration * 1000)).toISOString();
+                
+                // Create auction document (FLAT path)
+                const auctionRef = doc(collection(db, 'auctions'));
+                await setDoc(auctionRef, {
+                    nftId: nftId,
+                    nftToken: nft.tokenId,
+                    nftName: nft.name,
+                    nftImage: nft.imageCid,
+                    seller: state.address,
+                    startingBid: startingBid,
+                    currentBid: startingBid,
+                    reservePrice: reservePrice || 0,
+                    highestBidder: null,
+                    bidCount: 0,
+                    startTime: new Date().toISOString(),
+                    endTime: endTime,
+                    status: 'active',
+                    currency: 'KTA'
+                });
+                
+                // Update NFT status (FLAT path)
+                await updateDoc(doc(db, 'nfts', nftId), {
+                    inAuction: true,
+                    auctionId: auctionRef.id,
+                    isListed: false,
+                    listedPrice: null
+                });
+                
+                document.getElementById('auctionModal')?.remove();
+                window.notify("🎪 Auction created!", "success");
+                
+                // Reload
+                await window.loadAuctions();
+                await window.loadNFTsFromFirebase();
+                window.switchTab('auctions');
+                
+            } catch (error) {
+                console.error("❌ Auction creation error:", error);
+                window.notify("Failed to create auction", "error");
+            }
+        };
+        
+        // Place bid
+        window.placeBid = async (auctionId) => {
+            if (!state.address) return window.notify("Connect wallet first", "error");
+            
+            const auction = state.auctions.find(a => a.id === auctionId);
+            if (!auction) return window.notify("Auction not found", "error");
+            
+            // Show bid modal
+            window.showBidModal(auction);
+        };
+        
+        // Show bid modal
+        window.showBidModal = (auction) => {
+            const minBid = auction.currentBid + (auction.currentBid * 0.05); // 5% increment
+            
+            const modal = document.createElement('div');
+            modal.id = 'bidModal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-view';
+            modal.innerHTML = `
+                <div class="glass-card p-8 max-w-md w-full space-y-6 border-2 border-cyan-500/30">
+                    <h3 class="orbitron text-2xl text-cyan-400 font-bold uppercase">💎 Place Bid</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-xs text-gray-500">NFT</div>
+                            <div class="text-lg font-bold text-white">${auction.nftName}</div>
+                        </div>
+                        
+                        <div>
+                            <div class="text-xs text-gray-500">Current Bid</div>
+                            <div class="text-xl font-bold text-cyan-400">${auction.currentBid} KTA</div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs orbitron text-gray-400 uppercase mb-2">Your Bid (KTA)</label>
+                            <input type="number" id="bidAmount" value="${minBid.toFixed(2)}" min="${minBid}" step="0.1"
+                                   class="w-full bg-black/60 border-2 border-cyan-500/30 p-3 rounded-lg text-white text-xl font-bold outline-none focus:border-cyan-500">
+                            <div class="text-[10px] text-gray-600 mt-1">Minimum: ${minBid.toFixed(2)} KTA (5% above current)</div>
+                        </div>
+                        
+                        <div class="bg-cyan-900/20 border-2 border-cyan-500/30 p-4 rounded-lg">
+                            <div class="text-xs text-gray-400 space-y-1">
+                                <div>• Your balance: ${state.balanceKTA.toFixed(2)} KTA</div>
+                                <div>• If outbid, funds returned automatically</div>
+                                <div>• If you win, NFT transferred to you</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="document.getElementById('bidModal').remove()" 
+                                class="flex-1 p-3 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 transition-all">
+                            Cancel
+                        </button>
+                        <button onclick="window.confirmPlaceBid('${auction.id}')" 
+                                class="flex-1 btn-primary p-3">
+                            💎 Place Bid
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        };
+        
+        // Confirm place bid
+        window.confirmPlaceBid = async (auctionId) => {
+            const bidAmount = parseFloat(document.getElementById('bidAmount')?.value || 0);
+            
+            const auction = state.auctions.find(a => a.id === auctionId);
+            if (!auction) return window.notify("Auction not found", "error");
+            
+            const minBid = auction.currentBid + (auction.currentBid * 0.05);
+            
+            if (bidAmount < minBid) {
+                return window.notify(`Bid must be at least ${minBid.toFixed(2)} KTA`, "error");
+            }
+            
+            if (bidAmount > state.balanceKTA) {
+                return window.notify("Insufficient KTA balance", "error");
+            }
+            
+            try {
+                window.notify("Placing bid...", "success");
+                
+                // Create bid record (FLAT path)
+                const bidRef = doc(collection(db, 'bids'));
+                await setDoc(bidRef, {
+                    auctionId: auctionId,
+                    bidder: state.address,
+                    amount: bidAmount,
+                    timestamp: new Date().toISOString(),
+                    status: 'active'
+                });
+                
+                // Update auction (FLAT path)
+                await updateDoc(doc(db, 'auctions', auctionId), {
+                    currentBid: bidAmount,
+                    highestBidder: state.address,
+                    bidCount: (auction.bidCount || 0) + 1
+                });
+                
+                // If there was a previous bidder, mark their bid as outbid
+                if (auction.highestBidder) {
+                    const previousBidsQuery = query(
+                        collection(db, 'bids'),
+                        where('auctionId', '==', auctionId),
+                        where('bidder', '==', auction.highestBidder),
+                        where('status', '==', 'active')
+                    );
+                    const previousBids = await getDocs(previousBidsQuery);
+                    previousBids.forEach(async (bidDoc) => {
+                        await updateDoc(doc(db, 'bids', bidDoc.id), { status: 'outbid' });
+                    });
+                }
+                
+                document.getElementById('bidModal')?.remove();
+                window.notify("✅ Bid placed successfully!", "success");
+                
+                // Reload
+                await window.loadAuctions();
+                window.renderAuctions();
+                
+            } catch (error) {
+                console.error("❌ Bid placement error:", error);
+                window.notify("Failed to place bid", "error");
+            }
+        };
+        
+        // Cancel auction (only if no bids)
+        window.cancelAuction = async (auctionId) => {
+            const auction = state.auctions.find(a => a.id === auctionId);
+            if (!auction) return window.notify("Auction not found", "error");
+            
+            if (auction.bidCount > 0) {
+                return window.notify("Cannot cancel auction with bids", "error");
+            }
+            
+            const confirmed = await window.showCustomConfirm({
+                icon: '🗑️',
+                title: 'Cancel Auction',
+                message: `Cancel auction for ${auction.nftName}?\n\nThe NFT will be returned to your wallet.`,
+                confirmText: '🗑️ Yes, Cancel Auction',
+                danger: true
+            });
+            
+            if (!confirmed) return;
+            
+            try {
+                window.notify("Cancelling auction...", "success");
+                
+                // Update auction status (FLAT path)
+                await updateDoc(doc(db, 'auctions', auctionId), {
+                    status: 'cancelled'
+                });
+                
+                // Update NFT (FLAT path)
+                await updateDoc(doc(db, 'nfts', auction.nftId), {
+                    inAuction: false,
+                    auctionId: null
+                });
+                
+                window.notify("✅ Auction cancelled", "success");
+                
+                // Reload
+                await window.loadAuctions();
+                await window.loadNFTsFromFirebase();
+                window.renderAuctions();
+                
+            } catch (error) {
+                console.error("❌ Auction cancel error:", error);
+                window.notify("Failed to cancel auction", "error");
+            }
+        };
+        
+        // ═══════════════════════════════════════════════════════════════════
+        // COLLECTION VERIFICATION SYSTEM (Admin Only)
+        // ═══════════════════════════════════════════════════════════════════
+        
+        // Verify collection (escrow wallet only)
+        window.verifyCollection = async (collectionId) => {
+            if (!state.address || state.address !== ESCROW_WALLET) {
+                return window.notify("Only escrow wallet can verify collections", "error");
+            }
+            
+            const confirmed = await window.showCustomConfirm({
+                icon: '✅',
+                title: 'Verify Collection',
+                message: 'Mark this collection as verified?\n\nThis adds a blue checkmark badge to show authenticity.',
+                confirmText: '✅ Verify Collection',
+                danger: false
+            });
+            
+            if (!confirmed) return;
+            
+            try {
+                await updateDoc(doc(db, 'collections', collectionId), {
+                    verified: true,
+                    verifiedAt: new Date().toISOString(),
+                    verifiedBy: state.address
+                });
+                
+                window.notify("✅ Collection verified!", "success");
+                await window.loadCollections();
+                
+            } catch (error) {
+                console.error("❌ Verification error:", error);
+                window.notify("Failed to verify collection", "error");
+            }
+        };
+        
+        // Unverify collection (escrow wallet only)
+        window.unverifyCollection = async (collectionId) => {
+            if (!state.address || state.address !== ESCROW_WALLET) {
+                return window.notify("Only escrow wallet can manage verification", "error");
+            }
+            
+            const confirmed = await window.showCustomConfirm({
+                icon: '⚠️',
+                title: 'Remove Verification',
+                message: 'Remove verification badge from this collection?',
+                confirmText: '🗑️ Remove Badge',
+                danger: true
+            });
+            
+            if (!confirmed) return;
+            
+            try {
+                await updateDoc(doc(db, 'collections', collectionId), {
+                    verified: false
+                });
+                
+                window.notify("✅ Verification removed", "success");
+                await window.loadCollections();
+                
+            } catch (error) {
+                console.error("❌ Unverify error:", error);
+                window.notify("Failed to remove verification", "error");
+            }
+        };
+        
+        // Populate verification collection selector
+        window.populateVerificationSelector = () => {
+            const selector = document.getElementById('verifyCollectionSelector');
+            if (!selector) return;
+            
+            selector.innerHTML = '<option value="">-- Select a Collection --</option>';
+            state.collections.forEach(col => {
+                const option = document.createElement('option');
+                option.value = col.collectionId;
+                option.textContent = `${col.collectionTitle}${col.verified ? ' ✅' : ''}`;
+                selector.appendChild(option);
+            });
+        };
+        
+        // Handle verification selector change
+        window.setupVerificationPanel = () => {
+            const selector = document.getElementById('verifyCollectionSelector');
+            const controls = document.getElementById('verificationControls');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const unverifyBtn = document.getElementById('unverifyBtn');
+            
+            if (selector) {
+                selector.addEventListener('change', (e) => {
+                    const collectionId = e.target.value;
+                    if (collectionId && controls) {
+                        const collection = state.collections.find(c => c.collectionId === collectionId);
+                        controls.classList.remove('hidden');
+                        
+                        if (collection && collection.verified) {
+                            verifyBtn?.classList.add('opacity-50', 'pointer-events-none');
+                            unverifyBtn?.classList.remove('opacity-50', 'pointer-events-none');
+                        } else {
+                            verifyBtn?.classList.remove('opacity-50', 'pointer-events-none');
+                            unverifyBtn?.classList.add('opacity-50', 'pointer-events-none');
+                        }
+                    } else {
+                        controls?.classList.add('hidden');
+                    }
+                });
+            }
+        };
+        
+        // Verify from panel
+        window.verifyCollectionFromPanel = async () => {
+            const collectionId = document.getElementById('verifyCollectionSelector')?.value;
+            if (!collectionId) return window.notify("Select a collection first", "error");
+            await window.verifyCollection(collectionId);
+            window.populateVerificationSelector();
+        };
+        
+        // Unverify from panel
+        window.unverifyCollectionFromPanel = async () => {
+            const collectionId = document.getElementById('verifyCollectionSelector')?.value;
+            if (!collectionId) return window.notify("Select a collection first", "error");
+            await window.unverifyCollection(collectionId);
+            window.populateVerificationSelector();
+        };
+        
+        // ═══════════════════════════════════════════════════════════════════
+        // COMMENTS SYSTEM
+        // ═══════════════════════════════════════════════════════════════════
+        
+        // Load comments for NFT
+        window.loadComments = async (nftId) => {
+            try {
+                const commentsQuery = query(
+                    collection(db, 'comments'),
+                    where('nftId', '==', nftId),
+                    orderBy('timestamp', 'desc')
+                );
+                
+                const snapshot = await getDocs(commentsQuery);
+                const comments = [];
+                
+                snapshot.forEach(doc => {
+                    comments.push({ id: doc.id, ...doc.data() });
+                });
+                
+                state.comments[nftId] = comments;
+                console.log(`✅ Loaded ${comments.length} comments for NFT ${nftId}`);
+                return comments;
+                
+            } catch (error) {
+                console.error("❌ Error loading comments:", error);
+                return [];
+            }
+        };
+        
+        // Post comment
+        window.postComment = async (nftId, text) => {
+            if (!state.address) return window.notify("Connect wallet to comment", "error");
+            if (!text || text.trim().length === 0) return window.notify("Comment cannot be empty", "error");
+            if (text.length > 500) return window.notify("Comment too long (max 500 characters)", "error");
+            
+            try {
+                const commentRef = doc(collection(db, 'comments'));
+                await setDoc(commentRef, {
+                    nftId: nftId,
+                    author: state.address,
+                    text: text.trim(),
+                    timestamp: new Date().toISOString(),
+                    likes: 0
+                });
+                
+                window.notify("✅ Comment posted!", "success");
+                await window.loadComments(nftId);
+                window.renderComments(nftId);
+                
+                // Clear input
+                const input = document.getElementById(`commentInput_${nftId}`);
+                if (input) input.value = '';
+                
+            } catch (error) {
+                console.error("❌ Error posting comment:", error);
+                window.notify("Failed to post comment", "error");
+            }
+        };
+        
+        // Delete comment (author or admin only)
+        window.deleteComment = async (commentId, nftId, authorAddress) => {
+            if (!state.address) return;
+            
+            // Only author or escrow wallet can delete
+            if (state.address !== authorAddress && state.address !== ESCROW_WALLET) {
+                return window.notify("You can only delete your own comments", "error");
+            }
+            
+            const confirmed = await window.showCustomConfirm({
+                icon: '🗑️',
+                title: 'Delete Comment',
+                message: 'Delete this comment permanently?',
+                confirmText: '🗑️ Delete',
+                danger: true
+            });
+            
+            if (!confirmed) return;
+            
+            try {
+                await deleteDoc(doc(db, 'comments', commentId));
+                window.notify("✅ Comment deleted", "success");
+                await window.loadComments(nftId);
+                window.renderComments(nftId);
+                
+            } catch (error) {
+                console.error("❌ Error deleting comment:", error);
+                window.notify("Failed to delete comment", "error");
+            }
+        };
+        
+        // Render comments section
+        window.renderComments = (nftId) => {
+            const container = document.getElementById(`commentsSection_${nftId}`);
+            if (!container) return;
+            
+            const comments = state.comments[nftId] || [];
+            
+            const commentsHTML = comments.length > 0 ? comments.map(comment => {
+                const date = new Date(comment.timestamp);
+                const timeAgo = window.getTimeAgo(date);
+                const shortAddress = comment.author.substring(0, 12) + '...';
+                const isAuthor = comment.author === state.address;
+                const isAdmin = state.address === ESCROW_WALLET;
+                
+                return `
+                    <div class="bg-black/40 border border-white/5 rounded-lg p-4 space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono text-xs text-cyan-400">${shortAddress}</span>
+                                    ${isAuthor ? '<span class="text-[8px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded orbitron font-bold">YOU</span>' : ''}
+                                </div>
+                                <div class="text-[10px] text-gray-500 mt-1">${timeAgo}</div>
+                            </div>
+                            ${(isAuthor || isAdmin) ? `
+                                <button onclick="window.deleteComment('${comment.id}', '${nftId}', '${comment.author}')" 
+                                        class="text-red-400 hover:text-red-300 text-xs p-1">
+                                    🗑️
+                                </button>
+                            ` : ''}
+                        </div>
+                        <p class="text-sm text-white fira">${window.escapeHtml(comment.text)}</p>
+                    </div>
+                `;
+            }).join('') : '<div class="text-center py-8 text-gray-500 fira text-sm">No comments yet. Be the first!</div>';
+            
+            const commentForm = state.address ? `
+                <div class="space-y-3">
+                    <textarea 
+                        id="commentInput_${nftId}" 
+                        placeholder="Share your thoughts..." 
+                        maxlength="500"
+                        class="w-full bg-black/60 border-2 border-cyan-500/30 rounded-lg p-3 text-white text-sm outline-none focus:border-cyan-500 resize-none"
+                        rows="3"></textarea>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500 fira">Max 500 characters</span>
+                        <button onclick="window.postComment('${nftId}', document.getElementById('commentInput_${nftId}').value)" 
+                                class="bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-400 px-6 py-2 rounded-lg text-sm orbitron font-bold hover:bg-cyan-500/30 transition-all">
+                            💬 Post Comment
+                        </button>
+                    </div>
+                </div>
+            ` : '<div class="text-center py-4 text-gray-500 fira text-sm">Connect wallet to comment</div>';
+            
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2">
+                        <h4 class="orbitron text-lg font-bold text-white">💬 Comments</h4>
+                        <span class="text-xs text-gray-500 fira">(${comments.length})</span>
+                    </div>
+                    ${commentForm}
+                    <div class="space-y-3 max-h-96 overflow-y-auto">
+                        ${commentsHTML}
+                    </div>
+                </div>
+            `;
+        };
+        
+        // Helper: Escape HTML
+        window.escapeHtml = (text) => {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+        
+        // Helper: Time ago
+        window.getTimeAgo = (date) => {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60
+            };
+            
+            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInUnit);
+                if (interval >= 1) {
+                    return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
+                }
+            }
+            
+            return 'Just now';
+        };
+
         // Call initialization when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => initializeMarketplace());
@@ -9284,5 +10490,26 @@
         </div>
     </div>
 </div>
+
+<!-- Custom Confirmation Modal -->
+<div id="customConfirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-gradient-to-br from-gray-900 to-black border-2 border-cyan-500/30 rounded-2xl p-8 max-w-md w-full shadow-[0_0_50px_rgba(0,255,255,0.3)] animate-view">
+        <div class="text-center mb-6">
+            <div class="text-6xl mb-4" id="confirmModalIcon">⚠️</div>
+            <h3 class="orbitron text-2xl font-black text-white mb-2" id="confirmModalTitle">Confirm Action</h3>
+            <p class="fira text-sm text-gray-400" id="confirmModalMessage">Are you sure you want to proceed?</p>
+        </div>
+        
+        <div class="space-y-3">
+            <button id="confirmModalConfirm" class="w-full py-4 rounded-xl orbitron font-bold text-sm transition-all">
+                Confirm
+            </button>
+            <button id="confirmModalCancel" class="w-full py-4 rounded-xl bg-gray-700/30 border border-gray-600/30 text-gray-300 hover:bg-gray-700/50 orbitron font-bold text-sm transition-all">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
