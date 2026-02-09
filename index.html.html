@@ -851,13 +851,6 @@
                 </div>
                 
                 <div id="colPageGrid" class="grid grid-cols-2 md:grid-cols-5 gap-6"></div>
-                
-                <!-- Collection Comments Section -->
-                <div class="glass-card p-8 mt-8">
-                    <div id="commentsSection_collection" class="space-y-4">
-                        <div class="text-center py-8 text-gray-500 fira text-sm">Loading comments...</div>
-                    </div>
-                </div>
             </section>
 
             <!-- Personal Modules -->
@@ -1749,7 +1742,9 @@
             auctions: [],
             myBids: [],
             // Comments system
-            comments: {}  // nftId -> [comments]
+            comments: {},  // nftId -> [comments]
+            currentCommentTarget: null,
+            commentWidgetOpen: false
         };
         
         window.state = state;
@@ -1830,11 +1825,10 @@
                 setTimeout(() => window.updateFloorPulse(), 100);
             } else if (tabName === 'collection') {
                 window.renderCollection();
-                // Load comments for the collection
+                // Open comment widget for the collection
                 if (state.viewingCollection) {
-                    window.loadComments('collection_' + state.viewingCollection).then(() => {
-                        window.renderComments('collection_' + state.viewingCollection);
-                    });
+                    const col = state.collections.find(c => c.collectionId === state.viewingCollection);
+                    window.openCommentWidget(state.viewingCollection, col?.collectionTitle || 'Collection');
                 }
             } else if (tabName === 'offers' && state.address) {
                 window.loadOffers();
@@ -3981,10 +3975,29 @@
                 return;
             }
             
-            // Dice image hosted on IPFS
-            const DICE_IMAGE_URL = 'https://gateway.pinata.cloud/ipfs/bafybeidgzwxcrhvf2jpo65gtqrt33otfk4yqwjc5vadntpp4yntqohvgtm';
+            // Array of blind mint dice/cube images - 4 different dice images rotate randomly
+            const DICE_IMAGES = [
+                'https://gateway.pinata.cloud/ipfs/bafybeidgzwxcrhvf2jpo65gtqrt33otfk4yqwjc5vadntpp4yntqohvgtm',  // Original dice image
+                'https://gateway.pinata.cloud/ipfs/bafybeibpvuy7epndrgfnsy3m7rnb7p5qoqcy2xjf3lpaxmia6syo4gukci',  // Image 1: Orange/Pink PUNKSWAP pattern
+                'https://gateway.pinata.cloud/ipfs/bafybeigcavce4rtjafivzojhxhryng3v4jpxx2vguoyrlonwz7duliykym',  // Image 2: Blue dice with orange PUNKSWAP
+                'https://gateway.pinata.cloud/ipfs/bafybeie7qiwtuuky6rnsc4fozgkmmzqfmahrqdxpwyky4ocs54lv6wy2m4'   // Image 3: Cyan neon PUNKSWAP square
+            ];
+            
+            // Helper function to get random dice image for a collection
+            const getRandomDiceImage = (collectionId) => {
+                // Use collection ID as seed for consistent image per collection (same collection = same dice)
+                let hash = 0;
+                for (let i = 0; i < collectionId.length; i++) {
+                    hash = ((hash << 5) - hash) + collectionId.charCodeAt(i);
+                    hash = hash & hash;
+                }
+                const index = Math.abs(hash) % DICE_IMAGES.length;
+                return DICE_IMAGES[index];
+            };
             
             container.innerHTML = activeCollections.map(col => {
+                const DICE_IMAGE_URL = getRandomDiceImage(col.collectionId);
+                
                 // Check whitelist status
                 const whitelistSettings = state.whitelistSettings[col.collectionId];
                 let buttonClass = 'btn-primary w-full py-3 group-hover:bg-cyan-500/20 transition-all';
@@ -8841,6 +8854,46 @@
                 }
                 const collection = await this.getCollection(req.collectionId);
                 const docId = `nft_${getNormalizedId(collection.collectionToken || collection.id)}_${mintIndex}`;
+                
+                // Create unique symbol from collection title
+                // Example: "Peregrine Falcon Punk" → "PFPN"
+                // Example: "Cool Cats" → "CCAT"
+                // Example: "Bored Ape Yacht Club" → "BAYC"
+                const words = (collection.collectionTitle || 'NFT').split(/\s+/);
+                let collectionSymbol;
+                
+                if (words.length >= 2) {
+                    // Multi-word: Take first letter of each word
+                    collectionSymbol = words
+                        .map(word => word.charAt(0))
+                        .join('')
+                        .toUpperCase()
+                        .substring(0, 4);
+                } else {
+                    // Single word: Take first 4 letters
+                    collectionSymbol = (collection.collectionTitle || 'NFT')
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9]/g, '')
+                        .substring(0, 4);
+                }
+                
+                // Ensure minimum length of 2
+                if (collectionSymbol.length < 2) {
+                    collectionSymbol = collectionSymbol + 'NFT'.substring(0, 4 - collectionSymbol.length);
+                }
+                
+                const walletStyleDescription = metadata.description || `${metadata.name} from the ${collection.collectionTitle} collection. Token #${mintIndex} of ${collection.totalSupply}.`;
+                
+                // Ensure NFT name includes the number (like "Peregrine Falcon Punk NFT No 191")
+                let nftName = metadata.name;
+                
+                // If the name doesn't already have a number pattern (#123, No 123, etc.), add it
+                const hasNumber = /(?:#|\bNo\.?\s*)\d+/i.test(nftName);
+                if (!hasNumber) {
+                    // Add "No X" format to match Keeta wallet style
+                    nftName = `${nftName} No ${mintIndex}`;
+                }
+                
                 await setDoc(doc(this.db, 'nfts', docId), {
                     id: docId,
                     tokenId,
@@ -8848,14 +8901,17 @@
                     collectionId: req.collectionId,
                     collectionTitle: collection.collectionTitle || collection.title,
                     collectionName: collection.collectionTitle || collection.title,
+                    collectionSymbol: collectionSymbol,  // NEW: Unique per collection
                     collection: collection.collectionTitle || collection.title,
                     collectionToken: collection.collectionToken,
-                    name: metadata.name,
-                    description: metadata.description || '',
+                    name: nftName,  // ENHANCED: Always includes number
+                    description: walletStyleDescription,  // ENHANCED: Better formatted description
                     imageCid: imagePath,
                     imagePath: imagePath,
                     attributes: metadata.attributes || [],
                     mintIndex,
+                    mintNumber: `#${mintIndex}`,  // NEW: Display format
+                    totalSupply: collection.totalSupply,  // NEW: For "X of Y" display
                     mintTxHash: txHash,
                     mintedAt: new Date().toISOString(),
                     status: 'minted',
@@ -10280,10 +10336,6 @@
                 await window.loadComments(nftId);
                 window.renderComments(nftId);
                 
-                // Clear input
-                const input = document.getElementById(`commentInput_${nftId}`);
-                if (input) input.value = '';
-                
             } catch (error) {
                 console.error("❌ Error posting comment:", error);
                 window.notify("Failed to post comment", "error");
@@ -10321,72 +10373,134 @@
             }
         };
         
-        // Render comments section
+        // Render comments in floating widget
         window.renderComments = (nftId) => {
-            const container = document.getElementById(`commentsSection_${nftId}`);
+            const container = document.getElementById('commentWidgetMessages');
             if (!container) return;
             
             const comments = state.comments[nftId] || [];
             
-            const commentsHTML = comments.length > 0 ? comments.map(comment => {
+            if (comments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-500 fira text-sm">
+                        <span class="text-4xl mb-2 block">💬</span>
+                        No comments yet<br/>
+                        <span class="text-xs">Be the first to comment!</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = comments.map(comment => {
                 const date = new Date(comment.timestamp);
                 const timeAgo = window.getTimeAgo(date);
-                const shortAddress = comment.author.substring(0, 12) + '...';
+                const shortAddress = comment.author.substring(0, 8) + '...' + comment.author.substring(comment.author.length - 4);
                 const isAuthor = comment.author === state.address;
                 const isAdmin = state.address === ESCROW_WALLET;
                 
                 return `
-                    <div class="bg-black/40 border border-white/5 rounded-lg p-4 space-y-2">
+                    <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border ${isAuthor ? 'border-cyan-500/30' : 'border-white/5'} rounded-lg p-3 space-y-2 hover:border-cyan-500/20 transition-all">
                         <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-mono text-xs text-cyan-400">${shortAddress}</span>
-                                    ${isAuthor ? '<span class="text-[8px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded orbitron font-bold">YOU</span>' : ''}
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs font-bold">
+                                    ${comment.author.substring(6, 8).toUpperCase()}
                                 </div>
-                                <div class="text-[10px] text-gray-500 mt-1">${timeAgo}</div>
+                                <div>
+                                    <div class="font-mono text-xs text-cyan-400">${shortAddress}</div>
+                                    <div class="text-[10px] text-gray-500">${timeAgo}</div>
+                                </div>
+                                ${isAuthor ? '<span class="text-[8px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded orbitron font-bold ml-2">YOU</span>' : ''}
                             </div>
                             ${(isAuthor || isAdmin) ? `
                                 <button onclick="window.deleteComment('${comment.id}', '${nftId}', '${comment.author}')" 
-                                        class="text-red-400 hover:text-red-300 text-xs p-1">
+                                        class="text-red-400 hover:text-red-300 text-xs p-1 hover:bg-red-500/10 rounded transition-all"
+                                        title="Delete comment">
                                     🗑️
                                 </button>
                             ` : ''}
                         </div>
-                        <p class="text-sm text-white fira">${window.escapeHtml(comment.text)}</p>
+                        <p class="text-sm text-white fira pl-10">${window.escapeHtml(comment.text)}</p>
                     </div>
                 `;
-            }).join('') : '<div class="text-center py-8 text-gray-500 fira text-sm">No comments yet. Be the first!</div>';
+            }).join('');
             
-            const commentForm = state.address ? `
-                <div class="space-y-3">
-                    <textarea 
-                        id="commentInput_${nftId}" 
-                        placeholder="Share your thoughts..." 
-                        maxlength="500"
-                        class="w-full bg-black/60 border-2 border-cyan-500/30 rounded-lg p-3 text-white text-sm outline-none focus:border-cyan-500 resize-none"
-                        rows="3"></textarea>
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500 fira">Max 500 characters</span>
-                        <button onclick="window.postComment('${nftId}', document.getElementById('commentInput_${nftId}').value)" 
-                                class="bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-400 px-6 py-2 rounded-lg text-sm orbitron font-bold hover:bg-cyan-500/30 transition-all">
-                            💬 Post Comment
-                        </button>
-                    </div>
-                </div>
-            ` : '<div class="text-center py-4 text-gray-500 fira text-sm">Connect wallet to comment</div>';
+            // Auto-scroll to bottom
+            container.scrollTop = container.scrollHeight;
             
-            container.innerHTML = `
-                <div class="space-y-4">
-                    <div class="flex items-center gap-2">
-                        <h4 class="orbitron text-lg font-bold text-white">💬 Comments</h4>
-                        <span class="text-xs text-gray-500 fira">(${comments.length})</span>
-                    </div>
-                    ${commentForm}
-                    <div class="space-y-3 max-h-96 overflow-y-auto">
-                        ${commentsHTML}
-                    </div>
-                </div>
-            `;
+            // Update badge
+            const badge = document.getElementById('commentBadge');
+            if (badge && comments.length > 0) {
+                badge.textContent = comments.length;
+                badge.classList.remove('hidden');
+            }
+        };
+        
+        // Toggle comment widget
+        window.toggleCommentWidget = () => {
+            const panel = document.getElementById('commentWidgetPanel');
+            const toggle = document.getElementById('commentWidgetToggle');
+            
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                toggle.classList.add('hidden');
+            } else {
+                panel.classList.add('hidden');
+                toggle.classList.remove('hidden');
+            }
+        };
+        
+        // Minimize widget
+        window.minimizeCommentWidget = () => {
+            const panel = document.getElementById('commentWidgetPanel');
+            const toggle = document.getElementById('commentWidgetToggle');
+            panel.classList.add('hidden');
+            toggle.classList.remove('hidden');
+        };
+        
+        // Close widget
+        window.closeCommentWidget = () => {
+            const widget = document.getElementById('commentWidget');
+            widget.classList.add('hidden');
+            state.commentWidgetOpen = false;
+        };
+        
+        // Open widget for collection
+        window.openCommentWidget = (collectionId, collectionName) => {
+            const widget = document.getElementById('commentWidget');
+            const subtitle = document.getElementById('commentWidgetSubtitle');
+            const toggle = document.getElementById('commentWidgetToggle');
+            const panel = document.getElementById('commentWidgetPanel');
+            
+            widget.classList.remove('hidden');
+            toggle.classList.add('hidden');
+            panel.classList.remove('hidden');
+            
+            if (subtitle) {
+                subtitle.textContent = collectionName || 'Collection Chat';
+            }
+            
+            state.currentCommentTarget = 'collection_' + collectionId;
+            state.commentWidgetOpen = true;
+            
+            // Load comments
+            window.loadComments('collection_' + collectionId).then(() => {
+                window.renderComments('collection_' + collectionId);
+            });
+        };
+        
+        // Send comment from widget
+        window.sendCommentFromWidget = async () => {
+            const input = document.getElementById('commentWidgetTextInput');
+            const text = input?.value?.trim();
+            
+            if (!text) return;
+            if (!state.currentCommentTarget) {
+                window.notify("No collection selected", "error");
+                return;
+            }
+            
+            await window.postComment(state.currentCommentTarget, text);
+            input.value = '';
         };
         
         // Helper: Escape HTML
@@ -10487,6 +10601,69 @@
                 </div>
                 <button onclick="window.submitOffer()" class="btn-primary w-full py-4 text-sm">Submit Offer</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Comment Widget -->
+<div id="commentWidget" class="fixed bottom-6 right-6 z-40 hidden">
+    <!-- Widget Toggle Button (when minimized) -->
+    <button id="commentWidgetToggle" onclick="window.toggleCommentWidget()" 
+            class="hidden w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all border-2 border-white/20">
+        <span class="text-2xl">💬</span>
+        <span id="commentBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center hidden">0</span>
+    </button>
+    
+    <!-- Widget Panel (when expanded) -->
+    <div id="commentWidgetPanel" class="flex flex-col bg-gradient-to-br from-gray-900 to-black border-2 border-cyan-500/30 rounded-2xl shadow-2xl w-96 h-[600px] overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-purple-900/40 to-pink-900/40 p-4 flex justify-between items-center border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">💬</span>
+                <div>
+                    <h4 class="orbitron text-sm font-bold text-white">Collection Chat</h4>
+                    <p id="commentWidgetSubtitle" class="text-xs text-gray-400 fira">Select a collection</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="window.minimizeCommentWidget()" 
+                        class="text-gray-400 hover:text-white p-1 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <button onclick="window.closeCommentWidget()" 
+                        class="text-gray-400 hover:text-red-400 p-1 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Comments List (scrollable history) -->
+        <div id="commentWidgetMessages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-black/40">
+            <div class="text-center py-12 text-gray-500 fira text-sm">
+                <span class="text-4xl mb-2 block">💬</span>
+                No comments yet
+            </div>
+        </div>
+        
+        <!-- Input Area -->
+        <div id="commentWidgetInput" class="p-4 bg-gradient-to-r from-gray-900/80 to-black/80 border-t border-white/10">
+            <div class="flex gap-2">
+                <input type="text" 
+                       id="commentWidgetTextInput" 
+                       placeholder="Type your comment..." 
+                       maxlength="500"
+                       class="flex-1 bg-black/60 border-2 border-cyan-500/30 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-cyan-500"
+                       onkeypress="if(event.key==='Enter') window.sendCommentFromWidget()">
+                <button onclick="window.sendCommentFromWidget()" 
+                        class="bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-400 px-4 rounded-lg orbitron font-bold hover:bg-cyan-500/30 transition-all">
+                    Send
+                </button>
+            </div>
+            <div class="text-xs text-gray-500 mt-2 fira">Press Enter to send • Max 500 chars</div>
         </div>
     </div>
 </div>
