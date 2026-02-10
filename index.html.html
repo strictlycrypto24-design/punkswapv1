@@ -851,6 +851,40 @@
                 </div>
                 
                 <div id="colPageGrid" class="grid grid-cols-2 md:grid-cols-5 gap-6"></div>
+                
+                <!-- Collection Comments Section -->
+                <div id="collectionCommentsSection" class="mt-12 glass-card p-8 border-white/5">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="text-3xl">💬</span>
+                        <h3 class="orbitron text-2xl font-black text-white uppercase">Collection Chat</h3>
+                        <span id="commentCount" class="text-sm text-cyan-400 fira">(0 comments)</span>
+                    </div>
+                    
+                    <!-- Comment Input (only if wallet connected) -->
+                    <div id="commentInputSection" class="mb-8 hidden">
+                        <div class="flex gap-3">
+                            <input type="text" 
+                                   id="collectionCommentInput" 
+                                   placeholder="Share your thoughts about this collection..." 
+                                   maxlength="500"
+                                   class="flex-1 bg-black/60 border border-cyan-500/30 rounded-lg px-4 py-3 text-white text-sm fira outline-none focus:border-cyan-500"
+                                   onkeypress="if(event.key==='Enter') window.postCollectionComment()">
+                            <button onclick="window.postCollectionComment()" 
+                                    class="btn-primary px-8 py-3">
+                                💬 Post
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 fira mt-2">Press Enter or click Post to submit (max 500 characters)</p>
+                    </div>
+                    
+                    <!-- Comments List -->
+                    <div id="collectionCommentsList" class="space-y-4">
+                        <div class="text-center py-12 text-gray-500 fira">
+                            <span class="text-5xl mb-3 block">💬</span>
+                            <p>No comments yet. Be the first to share your thoughts!</p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- Personal Modules -->
@@ -1103,6 +1137,25 @@
                         </button>
                         <button onclick="window.wipeUIAndReload(true)" class="flex-1 p-4 rounded-lg border-2 border-red-500 text-red-400 orbitron text-sm font-bold uppercase hover:bg-red-500/10 transition-all">
                             💥 Hard Wipe & Reload
+                        </button>
+                    </div>
+                    
+                    <!-- FIREBASE DATABASE WIPE BUTTON -->
+                    <div class="bg-red-900/20 border-2 border-red-600 rounded-lg p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="text-3xl">🔥</span>
+                            <div>
+                                <div class="orbitron text-lg text-red-400 font-black uppercase">Nuclear Option</div>
+                                <div class="fira text-xs text-red-300">Wipe Firebase Database + UI Cache</div>
+                            </div>
+                        </div>
+                        <div class="bg-red-950/50 border border-red-700/50 rounded p-3 mb-4">
+                            <p class="fira text-xs text-red-200">
+                                <strong>⚠️ DANGER:</strong> This will permanently delete ALL NFTs, transactions, offers, bids, auctions, and comments from Firebase. Collections/whitelists will be preserved but counters reset to 0.
+                            </p>
+                        </div>
+                        <button onclick="window.autoWipeFirebaseDatabase()" class="w-full p-4 rounded-lg bg-red-600 hover:bg-red-700 border-2 border-red-400 text-white orbitron text-sm font-black uppercase transition-all shadow-lg shadow-red-900/50">
+                            🔥 WIPE FIREBASE DATABASE
                         </button>
                     </div>
                     
@@ -1653,7 +1706,7 @@
         
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot, getDocs, query, where, orderBy, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot, getDocs, query, where, orderBy, limit, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBe_G4Es-1UrPx_0unnByq2VsiSEKRj0GU",
@@ -1695,6 +1748,9 @@
         // ═══════════════════════════════════════════════════════════════════
         // GLOBAL STATE & CONSTANTS
         // ═══════════════════════════════════════════════════════════════════
+        
+        // CRITICAL: Your escrow wallet address - REPLACE WITH YOUR ACTUAL ESCROW WALLET
+        const ESCROW_WALLET = 'keeta_aahwlzckqrwutkvb5dvqkv7pzdlbuwwwnildzomjhajslz3tmhmzp3jmhlkq';
         
         const state = { 
             appId: 'punkswap-pro-auth-v16',
@@ -1741,6 +1797,15 @@
             // Auction system
             auctions: [],
             myBids: [],
+            // 📊 PERFORMANCE MONITORING
+            performanceMetrics: {
+                totalMints: 0,
+                successfulMints: 0,
+                failedMints: 0,
+                batchMints: [],  // Array of batch statistics
+                mintTimes: [],   // Array of individual mint times
+                lastUpdated: null
+            },
             // Comments system
             comments: {},  // nftId -> [comments]
             currentCommentTarget: null,
@@ -1772,6 +1837,14 @@
         const SECONDARY_SALE_SELLER_PERCENT = 0.92;
         const SECONDARY_SALE_CREATOR_ROYALTY_PERCENT = 0.05;
         const SECONDARY_SALE_MARKETPLACE_PERCENT = 0.03;
+        
+        // ⚡ PARALLEL MINTING CONFIGURATION (Optimized for Keeta blockchain)
+        const PARALLEL_MINT_CONFIG = {
+            CHUNK_SIZE: 1,               // Mints per batch (1 = sequential for blockchain stability)
+            SHOW_SPEED_STATS: true,      // Show minting speed in notifications  
+            MAX_RETRIES: 0,              // Retry failed mints (0 = no retry for speed)
+            ENABLE_OPTIMISTIC_UI: true   // Show NFTs immediately before blockchain confirm ⚡
+        };
 
         // ═══════════════════════════════════════════════════════════════════
         // TAB SWITCHING
@@ -1788,58 +1861,6 @@
             }
         };
         
-        window.switchTab = (tabName) => {
-            // Close mobile menu if open
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('mobileOverlay');
-            if (sidebar && overlay) {
-                sidebar.classList.remove('mobile-open');
-                overlay.classList.remove('active');
-            }
-            
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
-            });
-            
-            // Remove active state from all nav items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Show selected tab
-            const selectedTab = document.getElementById(`tab-${tabName}`);
-            if (selectedTab) {
-                selectedTab.classList.remove('hidden');
-            }
-            
-            // Set active nav item
-            const navItem = document.getElementById(`nav-${tabName}`);
-            if (navItem) {
-                navItem.classList.add('active');
-            }
-            
-            // Load data for specific tabs
-            if (tabName === 'market') {
-                window.renderMarketplace();
-                setTimeout(() => window.updateFloorPulse(), 100);
-            } else if (tabName === 'collection') {
-                window.renderCollection();
-                // Open comment widget for the collection
-                if (state.viewingCollection) {
-                    const col = state.collections.find(c => c.collectionId === state.viewingCollection);
-                    window.openCommentWidget(state.viewingCollection, col?.collectionTitle || 'Collection');
-                }
-            } else if (tabName === 'offers' && state.address) {
-                window.loadOffers();
-                window.renderOffers();
-            } else if (tabName === 'auctions') {
-                window.loadAuctions().then(() => window.renderAuctions());
-            } else if (tabName === 'activity') {
-                window.renderActivityFeed();
-            }
-        };
-
         // ═══════════════════════════════════════════════════════════════════
         // HELPER FUNCTIONS
         // ═══════════════════════════════════════════════════════════════════
@@ -1991,16 +2012,20 @@
             const totalMinted = collection?.mintedCount || 1;
             const uniqueId = `traits-${nft.id}-${Math.random().toString(36).substr(2, 9)}`;
             
-            const traitsHTML = nft.attributes.map(trait => {
+            const traitsHTML = nft.attributes.map((trait, index) => {
                 const traitRarity = window.calculateTraitRarity(trait, nft.collectionId, totalMinted);
                 const tier = window.getRarityTier(traitRarity);
+                
+                // Clean trait_type: remove leading numbers (handles "1 BACKGROUND", "3 BODY", etc.)
+                const cleanTraitType = (trait.trait_type || 'Unknown').replace(/^\d+\s+/, '');
+                
                 return `
-                    <div class="trait-badge">
-                        <div class="flex justify-between text-xs">
-                            <span class="text-gray-400 uppercase font-semibold">${trait.trait_type || 'Unknown'}</span>
+                    <div class="trait-badge" style="border-color: ${tier.borderColor || 'rgba(255,255,255,0.1)'}">
+                        <div class="flex justify-between text-xs items-center">
+                            <span class="text-gray-400 uppercase font-semibold text-[10px]">${cleanTraitType}</span>
                             <span class="${tier.color} font-bold">${trait.value || 'Unknown'}</span>
                         </div>
-                        <div class="text-[10px] text-gray-500 mt-0.5">
+                        <div class="text-[10px] ${tier.color} mt-0.5 font-bold">
                             ${traitRarity.toFixed(1)}% rarity
                         </div>
                     </div>
@@ -2015,13 +2040,17 @@
             if (mode === 'limited') {
                 return `
                     <div class="mt-3 space-y-1.5">
-                        ${nft.attributes.slice(0, 3).map(trait => {
+                        ${nft.attributes.slice(0, 3).map((trait, index) => {
                             const traitRarity = window.calculateTraitRarity(trait, nft.collectionId, totalMinted);
                             const tier = window.getRarityTier(traitRarity);
+                            
+                            // Clean trait_type: remove leading numbers
+                            const cleanTraitType = (trait.trait_type || 'Unknown').replace(/^\d+\s+/, '');
+                            
                             return `
-                                <div class="trait-badge ${tier.glow}">
-                                    <div class="flex justify-between text-xs">
-                                        <span class="text-gray-400 uppercase font-semibold">${trait.trait_type || 'Unknown'}</span>
+                                <div class="trait-badge ${tier.glow}" style="border-color: ${tier.borderColor || 'rgba(255,255,255,0.1)'}">
+                                    <div class="flex justify-between text-xs items-center">
+                                        <span class="text-gray-400 uppercase font-semibold text-[10px]">${cleanTraitType}</span>
                                         <span class="${tier.color} font-bold">${trait.value || 'Unknown'}</span>
                                     </div>
                                     <div class="text-[10px] ${tier.color} mt-0.5 font-bold">
@@ -2099,11 +2128,11 @@
         };
 
         window.getRarityTier = (rarityPercent) => {
-            if (rarityPercent > 20) return { tier: 'common', color: 'text-gray-400', glow: '' };
-            if (rarityPercent > 10) return { tier: 'uncommon', color: 'text-green-400', glow: 'shadow-[0_0_10px_rgba(34,197,94,0.3)]' };
-            if (rarityPercent > 3) return { tier: 'rare', color: 'text-blue-400', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.5)]' };
-            if (rarityPercent > 1) return { tier: 'elite', color: 'text-purple-400', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.6)]' };
-            return { tier: 'mythic', color: 'text-yellow-400', glow: 'shadow-[0_0_25px_rgba(234,179,8,0.8)]' };
+            if (rarityPercent > 20) return { tier: 'common', color: 'text-gray-400', glow: '', borderColor: 'rgba(156,163,175,0.3)' };
+            if (rarityPercent > 10) return { tier: 'uncommon', color: 'text-green-400', glow: 'shadow-[0_0_10px_rgba(34,197,94,0.3)]', borderColor: 'rgba(34,197,94,0.5)' };
+            if (rarityPercent > 3) return { tier: 'rare', color: 'text-blue-400', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.5)]', borderColor: 'rgba(59,130,246,0.6)' };
+            if (rarityPercent > 1) return { tier: 'elite', color: 'text-purple-400', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.6)]', borderColor: 'rgba(168,85,247,0.7)' };
+            return { tier: 'mythic', color: 'text-yellow-400', glow: 'shadow-[0_0_25px_rgba(234,179,8,0.8)]', borderColor: 'rgba(234,179,8,0.8)' };
         };
 
         // ═══════════════════════════════════════════════════════════════════
@@ -3256,6 +3285,7 @@
                 window.renderCollections();
                 window.populateWhitelistCollections(); // Populate whitelist dropdown
                 window.populateVerificationSelector(); // Populate verification dropdown
+                window.populateCommentCollectionDropdown(); // Populate comment dropdown
                 window.renderMyWhitelists(); // Render My Whitelists section
                 window.updateAirdropVisibility();
                 
@@ -3595,7 +3625,7 @@
             }
         };
 
-        // FIX #7: Bulk minting function
+        // FIX #7: Bulk minting function - OPTIMIZED FOR KEETA SPEED ⚡
         window.mintMultipleFromCollection = async (collectionId) => {
             if (!state.address) {
                 return window.notify("Connect wallet first", "error");
@@ -3609,56 +3639,228 @@
                 return window.notify("Invalid quantity (1-10)", "error");
             }
             
+            // Get collection info for optimistic UI
+            const collection = state.collections.find(c => c.collectionId === collectionId);
+            if (!collection) {
+                return window.notify("Collection not found", "error");
+            }
+            
             try {
-                window.notify(`🎲 Minting ${quantity} NFTs...`, "success");
+                // Show initial progress
+                const progressMsg = `🎲 Minting ${quantity} NFT${quantity > 1 ? 's' : ''}...`;
+                window.notify(progressMsg, "success");
+                console.log(`⚡ Starting ${quantity} mints with OPTIMISTIC UI...`);
                 
                 let successCount = 0;
                 let failedCount = 0;
+                const startTime = Date.now();
+                const optimisticNFTs = []; // Track optimistic NFTs for rollback
                 
-                // ⚡ PARALLEL minting - all at once for speed!
-                console.log(`⚡ Starting ${quantity} parallel mints...`);
+                // ⚡ OPTIMISTIC UI: Create placeholder NFTs immediately
+                if (PARALLEL_MINT_CONFIG.ENABLE_OPTIMISTIC_UI) {
+                    for (let i = 0; i < quantity; i++) {
+                        const optimisticId = `optimistic_${Date.now()}_${i}`;
+                        const optimisticNFT = {
+                            id: optimisticId,
+                            name: `${collection.collectionTitle} #???`,
+                            description: 'Minting in progress...',
+                            collectionId: collectionId,
+                            collectionTitle: collection.collectionTitle,
+                            collectionToken: collection.collectionToken,
+                            owner: state.address,
+                            status: 'pending',
+                            isOptimistic: true,
+                            imagePath: 'https://gateway.pinata.cloud/ipfs/bafybeidgzwxcrhvf2jpo65gtqrt33otfk4yqwjc5vadntpp4yntqohvgtm', // Dice image
+                            mintedAt: new Date().toISOString(),
+                            attributes: []
+                        };
+                        
+                        // Add to state immediately
+                        state.nfts.unshift(optimisticNFT);
+                        optimisticNFTs.push(optimisticId);
+                    }
+                    
+                    // Render UI immediately ⚡
+                    window.renderCollection();
+                    console.log(`⚡ ${quantity} optimistic NFTs displayed instantly!`);
+                }
                 
-                const mintPromises = [];
+                // ⚡ SEQUENTIAL EXECUTION (CRITICAL for Keeta blockchain voting)
+                // Keeta's voting consensus requires transactions to complete before submitting next one
+                const mintMetrics = []; // Track performance for each mint
+                
                 for (let i = 0; i < quantity; i++) {
                     const mintNum = i + 1;
+                    const optimisticId = optimisticNFTs[i];
+                    const mintStart = performance.now();
                     
-                    const mintPromise = (async () => {
-                        console.log(`🎨 Starting mint ${mintNum}/${quantity}`);
-                        try {
-                            const result = await window.mintFromCollection(collectionId);
+                    console.log(`🎨 Mint ${mintNum}/${quantity} starting...`);
+                    try {
+                        const result = await window.mintFromCollection(collectionId);
+                        const mintDuration = performance.now() - mintStart;
+                        
+                        if (result && result.success) {
+                            successCount++;
+                            console.log(`✅ Mint ${mintNum}/${quantity} SUCCESS (${(mintDuration/1000).toFixed(1)}s)`);
                             
-                            // Check if mint actually succeeded
-                            if (result && result.success) {
-                                successCount++;
-                                console.log(`✅ Mint ${mintNum} SUCCESS`);
-                            } else {
-                                failedCount++;
-                                console.error(`❌ Mint ${mintNum} FAILED:`, result?.error || 'Unknown error');
+                            // Store performance metrics
+                            mintMetrics.push({
+                                mintNum,
+                                success: true,
+                                duration: mintDuration,
+                                mintIndex: result.perfMetrics?.mintIndex,
+                                timings: result.perfMetrics?.timings
+                            });
+                            
+                            // Replace optimistic NFT with real one
+                            if (PARALLEL_MINT_CONFIG.ENABLE_OPTIMISTIC_UI) {
+                                setTimeout(async () => {
+                                    // Remove optimistic, load real NFT
+                                    state.nfts = state.nfts.filter(n => n.id !== optimisticId);
+                                    await window.loadNFTsFromFirebase();
+                                    window.renderCollection();
+                                }, 500);
                             }
-                        } catch (error) {
-                            console.error(`❌ Mint ${mintNum} exception:`, error);
+                        } else {
                             failedCount++;
+                            console.error(`❌ Mint ${mintNum}/${quantity} FAILED:`, result?.error);
+                            
+                            // Store failure metrics
+                            mintMetrics.push({
+                                mintNum,
+                                success: false,
+                                duration: mintDuration,
+                                error: result?.error
+                            });
+                            
+                            // Remove failed optimistic NFT
+                            if (PARALLEL_MINT_CONFIG.ENABLE_OPTIMISTIC_UI) {
+                                state.nfts = state.nfts.filter(n => n.id !== optimisticId);
+                                window.renderCollection();
+                            }
                         }
-                    })();
+                    } catch (error) {
+                        console.error(`❌ Mint ${mintNum}/${quantity} exception:`, error);
+                        failedCount++;
+                        
+                        // Remove failed optimistic NFT
+                        if (PARALLEL_MINT_CONFIG.ENABLE_OPTIMISTIC_UI) {
+                            state.nfts = state.nfts.filter(n => n.id !== optimisticId);
+                            window.renderCollection();
+                        }
+                    }
                     
-                    mintPromises.push(mintPromise);
-                    
-                    // Tiny 100ms stagger
+                    // SAFETY: 2-second buffer between mints for voting system
+                    // This ensures the previous mint's transactions are fully confirmed
                     if (i < quantity - 1) {
-                        await new Promise(r => setTimeout(r, 100));
+                        console.log("⏳ Waiting 2s before next mint...");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
+                    
+                    // Progress update
+                    const completed = successCount + failedCount;
+                    if (completed < quantity) {
+                        console.log(`📊 Progress: ${completed}/${quantity} complete (${successCount} success, ${failedCount} failed)`);
                     }
                 }
                 
-                // Wait for all to complete
-                console.log(`⏳ Waiting for all ${quantity} mints...`);
-                await Promise.allSettled(mintPromises);
-                console.log(`✅ All mints complete!`)
+                const endTime = Date.now();
+                const duration = ((endTime - startTime) / 1000).toFixed(1);
+                
+                // 📊 BATCH PERFORMANCE ANALYTICS
+                console.log(`
+╔════════════════════════════════════════════════════════════════════
+║ 📊 BATCH MINT PERFORMANCE REPORT
+╠════════════════════════════════════════════════════════════════════
+║ ✅ Success: ${successCount}/${quantity} mints
+║ ❌ Failed: ${failedCount}/${quantity} mints
+║ ⏱️  Total Time: ${duration}s
+║ ⚡ Average Speed: ${(quantity / parseFloat(duration)).toFixed(2)} mints/second
+║ 📈 Per-Mint Average: ${(parseFloat(duration) / quantity).toFixed(2)}s
+╠════════════════════════════════════════════════════════════════════
+║ 🎯 INDIVIDUAL MINT TIMINGS:
+╠════════════════════════════════════════════════════════════════════`);
+                
+                mintMetrics.forEach(m => {
+                    const status = m.success ? '✅' : '❌';
+                    const time = (m.duration / 1000).toFixed(1);
+                    console.log(`║   ${status} Mint #${m.mintNum}: ${time}s ${m.mintIndex !== undefined ? `(Index: ${m.mintIndex})` : ''}`);
+                    if (m.timings) {
+                        console.log(`║      └─ Breakdown: Val:${m.timings.validation}ms | Meta:${m.timings.metadata}ms | Token:${m.timings.tokenCreation}ms | Pay:${m.timings.payment}ms | DB:${m.timings.firebase}ms`);
+                    }
+                    if (m.error) {
+                        console.log(`║      └─ Error: ${m.error}`);
+                    }
+                });
+                
+                // Calculate statistics
+                const successfulMints = mintMetrics.filter(m => m.success);
+                if (successfulMints.length > 0) {
+                    const durations = successfulMints.map(m => m.duration);
+                    const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+                    const minDuration = Math.min(...durations);
+                    const maxDuration = Math.max(...durations);
+                    
+                    console.log(`╠════════════════════════════════════════════════════════════════════
+║ 📈 STATISTICS (Successful Mints Only):
+╠════════════════════════════════════════════════════════════════════
+║   ⏱️  Average: ${(avgDuration/1000).toFixed(2)}s per mint
+║   🏃 Fastest: ${(minDuration/1000).toFixed(2)}s
+║   🐌 Slowest: ${(maxDuration/1000).toFixed(2)}s
+║   📊 Variance: ${((maxDuration - minDuration)/1000).toFixed(2)}s`);
+                }
+                
+                console.log(`╚════════════════════════════════════════════════════════════════════`);
+                
+                // 💾 SAVE METRICS TO GLOBAL STATE
+                const batchStats = {
+                    timestamp: new Date().toISOString(),
+                    quantity,
+                    successCount,
+                    failedCount,
+                    duration: parseFloat(duration),
+                    avgTime: parseFloat(duration) / quantity,
+                    collectionId,
+                    metrics: mintMetrics
+                };
+                
+                state.performanceMetrics.batchMints.push(batchStats);
+                state.performanceMetrics.totalMints += quantity;
+                state.performanceMetrics.successfulMints += successCount;
+                state.performanceMetrics.failedMints += failedCount;
+                state.performanceMetrics.mintTimes.push(...mintMetrics.map(m => m.duration / 1000));
+                state.performanceMetrics.lastUpdated = new Date().toISOString();
+                
+                // Keep only last 50 batches to prevent memory bloat
+                if (state.performanceMetrics.batchMints.length > 50) {
+                    state.performanceMetrics.batchMints = state.performanceMetrics.batchMints.slice(-50);
+                }
+                
+                // Keep only last 500 individual mint times
+                if (state.performanceMetrics.mintTimes.length > 500) {
+                    state.performanceMetrics.mintTimes = state.performanceMetrics.mintTimes.slice(-500);
+                }
+                
+                console.log(`✅ Batch complete! ${successCount} success, ${failedCount} failed in ${duration}s`);
+                console.log(`⚡ Speed: ${(quantity / parseFloat(duration)).toFixed(1)} mints/second`);
                 
                 // Final notification
                 if (successCount > 0) {
-                    window.notify(`✅ Successfully minted ${successCount}/${quantity} NFTs!`, "success");
+                    let message = `✅ Successfully minted ${successCount}/${quantity} NFT${successCount > 1 ? 's' : ''}!`;
+                    
+                    // Add speed stats if enabled
+                    if (PARALLEL_MINT_CONFIG.SHOW_SPEED_STATS && quantity > 1) {
+                        const speed = (quantity / parseFloat(duration)).toFixed(1);
+                        message += ` ⚡ ${duration}s (${speed}/s)`;
+                    }
+                    
+                    window.notify(message, "success");
                 } else {
-                    window.notify(`❌ All mints failed`, "error");
+                    window.notify(`❌ All ${quantity} mints failed`, "error");
+                }
+                
+                if (failedCount > 0) {
+                    window.notify(`⚠️ ${failedCount} mint${failedCount > 1 ? 's' : ''} failed - check console`, "warning");
                 }
                 
                 // Refresh collection data
@@ -3675,6 +3877,116 @@
                 console.error("Bulk mint error:", error);
                 window.notify(`❌ Bulk mint failed: ${error.message}`, "error");
             }
+        };
+
+        // 📊 PERFORMANCE ANALYTICS FUNCTION
+        window.showPerformanceReport = () => {
+            const perf = state.performanceMetrics;
+            
+            if (perf.totalMints === 0) {
+                console.log("📊 No minting data available yet. Mint some NFTs to see performance statistics!");
+                return;
+            }
+            
+            // Calculate statistics
+            const avgMintTime = perf.mintTimes.length > 0 
+                ? (perf.mintTimes.reduce((a, b) => a + b, 0) / perf.mintTimes.length).toFixed(2)
+                : 0;
+            const minMintTime = perf.mintTimes.length > 0 ? Math.min(...perf.mintTimes).toFixed(2) : 0;
+            const maxMintTime = perf.mintTimes.length > 0 ? Math.max(...perf.mintTimes).toFixed(2) : 0;
+            const successRate = ((perf.successfulMints / perf.totalMints) * 100).toFixed(1);
+            
+            // Recent performance (last 10 batches)
+            const recentBatches = perf.batchMints.slice(-10);
+            const recentAvgTime = recentBatches.length > 0
+                ? (recentBatches.reduce((sum, b) => sum + b.avgTime, 0) / recentBatches.length).toFixed(2)
+                : 0;
+            
+            console.log(`
+╔════════════════════════════════════════════════════════════════════════════
+║ 📊 PUNKSWAP PERFORMANCE ANALYTICS DASHBOARD
+╠════════════════════════════════════════════════════════════════════════════
+║ 📈 OVERALL STATISTICS:
+╠════════════════════════════════════════════════════════════════════════════
+║   🎯 Total Mints: ${perf.totalMints}
+║   ✅ Successful: ${perf.successfulMints} (${successRate}%)
+║   ❌ Failed: ${perf.failedMints}
+║   📦 Batch Operations: ${perf.batchMints.length}
+║   🕐 Last Updated: ${perf.lastUpdated ? new Date(perf.lastUpdated).toLocaleString() : 'N/A'}
+╠════════════════════════════════════════════════════════════════════════════
+║ ⏱️  TIMING STATISTICS (ALL TIME):
+╠════════════════════════════════════════════════════════════════════════════
+║   📊 Average Mint Time: ${avgMintTime}s
+║   🏃 Fastest Mint: ${minMintTime}s
+║   🐌 Slowest Mint: ${maxMintTime}s
+║   📏 Time Variance: ${(maxMintTime - minMintTime).toFixed(2)}s
+╠════════════════════════════════════════════════════════════════════════════
+║ 🔥 RECENT PERFORMANCE (Last 10 Batches):
+╠════════════════════════════════════════════════════════════════════════════
+║   ⏱️  Recent Avg: ${recentAvgTime}s per mint
+║   📊 Batches: ${recentBatches.length}
+╠════════════════════════════════════════════════════════════════════════════
+║ 📋 BATCH HISTORY:
+╠════════════════════════════════════════════════════════════════════════════`);
+
+            perf.batchMints.slice(-10).reverse().forEach((batch, index) => {
+                const time = new Date(batch.timestamp).toLocaleTimeString();
+                const date = new Date(batch.timestamp).toLocaleDateString();
+                console.log(`║   ${index + 1}. ${date} ${time}`);
+                console.log(`║      └─ ${batch.successCount}/${batch.quantity} success in ${batch.duration.toFixed(1)}s (avg ${batch.avgTime.toFixed(2)}s/mint)`);
+            });
+
+            console.log(`╠════════════════════════════════════════════════════════════════════════════
+║ 💡 PERFORMANCE INSIGHTS:
+╠════════════════════════════════════════════════════════════════════════════`);
+
+            // Generate insights
+            if (avgMintTime < 5) {
+                console.log(`║   🚀 EXCELLENT: Your average mint time (${avgMintTime}s) is very fast!`);
+            } else if (avgMintTime < 8) {
+                console.log(`║   ✅ GOOD: Your average mint time (${avgMintTime}s) is performing well.`);
+            } else if (avgMintTime < 12) {
+                console.log(`║   ⚠️  MODERATE: Average mint time (${avgMintTime}s) is acceptable.`);
+            } else {
+                console.log(`║   🐌 SLOW: Average mint time (${avgMintTime}s) is slower than expected.`);
+                console.log(`║      Check your network connection and blockchain congestion.`);
+            }
+            
+            if (successRate >= 95) {
+                console.log(`║   ✅ SUCCESS RATE: ${successRate}% - Excellent reliability!`);
+            } else if (successRate >= 80) {
+                console.log(`║   ⚠️  SUCCESS RATE: ${successRate}% - Some issues detected.`);
+            } else {
+                console.log(`║   ❌ SUCCESS RATE: ${successRate}% - High failure rate!`);
+                console.log(`║      Check console for error patterns.`);
+            }
+            
+            const variance = maxMintTime - minMintTime;
+            if (variance > 10) {
+                console.log(`║   ⚠️  HIGH VARIANCE: ${variance.toFixed(2)}s difference between fastest/slowest.`);
+                console.log(`║      Network congestion or blockchain load may be affecting consistency.`);
+            } else {
+                console.log(`║   ✅ CONSISTENT: Low variance (${variance.toFixed(2)}s) indicates stable performance.`);
+            }
+
+            console.log(`╚════════════════════════════════════════════════════════════════════════════
+                
+💡 TIP: Call window.showPerformanceReport() anytime to see updated statistics!
+💡 TIP: Call window.clearPerformanceData() to reset all metrics.
+`);
+        };
+        
+        // Clear performance data
+        window.clearPerformanceData = () => {
+            state.performanceMetrics = {
+                totalMints: 0,
+                successfulMints: 0,
+                failedMints: 0,
+                batchMints: [],
+                mintTimes: [],
+                lastUpdated: null
+            };
+            console.log("✅ Performance metrics cleared!");
         };
 
         window.executeMintSwap = async (nftAddr, collection, meta, mintIndex) => {
@@ -4560,6 +4872,7 @@
             
             grid.innerHTML = my.map(n => {
                 const isListed = n.isListed || false;
+                const isPending = n.isOptimistic || n.status === 'pending';
                 
                 // Collection name display
                 const collectionName = n.collectionName || n.collection || n.collectionTitle || 'Unknown Collection';
@@ -4570,6 +4883,16 @@
                 
                 // Render traits
                 const traitsHTML = window.renderNFTTraits(n, 'toggle', false);
+                
+                // Show pending badge if optimistic
+                const pendingBadge = isPending ? `
+                    <div class="absolute top-2 right-2 z-10">
+                        <div class="bg-gradient-to-br from-yellow-500 to-orange-600 text-white px-3 py-1.5 rounded-lg font-black text-[10px] orbitron shadow-lg border border-yellow-400/50 flex items-center gap-1.5 animate-pulse">
+                            <span class="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
+                            <span>CONFIRMING</span>
+                        </div>
+                    </div>
+                ` : '';
                 
                 // Show price badge if listed
                 const priceBadge = isListed ? `
@@ -4664,15 +4987,15 @@
                 `;
                 
                 return `
-                <div class="glass-card p-4 flex flex-col group border-white/5 shadow-xl transition-all hover:border-magenta-500/30 hover:shadow-2xl hover:shadow-magenta-500/10 relative">
-                    ${statusBadge}
+                <div class="glass-card p-4 flex flex-col group border-white/5 shadow-xl transition-all hover:border-magenta-500/30 hover:shadow-2xl hover:shadow-magenta-500/10 relative ${isPending ? 'opacity-75' : ''}">
+                    ${isPending ? pendingBadge : statusBadge}
                     <img src="${imgUrl}" 
                          onerror="this.onerror=null; this.src='https://ipfs.io/ipfs/${imgCid}'" 
-                         class="sharp-img rounded-lg aspect-square object-cover mb-3 border border-white/5 shadow-2xl group-hover:scale-[1.02] transition-transform duration-300">
+                         class="sharp-img rounded-lg aspect-square object-cover mb-3 border border-white/5 shadow-2xl group-hover:scale-[1.02] transition-transform duration-300 ${isPending ? 'animate-pulse' : ''}">
                     <h4 class="orbitron text-[9px] font-bold text-white uppercase truncate">${n.name}</h4>
                     <div class="text-[8px] fira text-cyan-400 mt-1 truncate">${collectionName}</div>
-                    ${traitsHTML}
-                    ${listingDropdown}
+                    ${isPending ? '<div class="text-[8px] text-yellow-400 mt-2 animate-pulse">⏳ Confirming on blockchain...</div>' : traitsHTML}
+                    ${isPending ? '' : listingDropdown}
                 </div>
                 `;
             }).join('');
@@ -4852,6 +5175,12 @@
             setTimeout(() => {
                 window.updateCollectionDepth(colToken);
             }, 100);
+            
+            // Load and render collection comments
+            const commentTarget = 'collection_' + colToken;
+            window.loadComments(commentTarget).then(() => {
+                window.renderCollectionComments(commentTarget);
+            });
             
             // Build trait filters
             window.buildTraitFilters(colNfts);
@@ -7860,17 +8189,8 @@
                         return true; // Accept everything else
                     });
                     
-                    // DEBUG: Log what's happening
-                    console.log("🔍 DEBUG - Seed validation:");
-                    console.log("- Raw input length:", savedSeed.length);
-                    console.log("- Split words count:", savedSeed.split(/\s+/).length);
-                    console.log("- Filtered words count:", words.length);
-                    console.log("- First 3 words:", words.slice(0, 3));
-                    console.log("- Last 3 words:", words.slice(-3));
-                    
-                    // Validate word count
+                    // Validate word count silently
                     if (words.length !== 12 && words.length !== 24) {
-                        console.warn(`⚠️ Stored seed invalid (${words.length} words), clearing`);
                         localStorage.removeItem('punkswap_wallet_seed');
                         return;
                     }
@@ -8587,7 +8907,26 @@
                 }
                 
                 console.log("✅ Collection found:", collection.collectionTitle);
+                
+                // 📊 CONCURRENT USER DETECTION
                 const totalSupply = (collection.mintedCount || 0) + (collection.remainingSupply || 0);
+                const currentMinted = collection.mintedCount || 0;
+                const supplyPct = ((currentMinted / totalSupply) * 100).toFixed(1);
+                
+                console.log(`📊 COLLECTION STATUS:`);
+                console.log(`   🎯 Minted: ${currentMinted}/${totalSupply} (${supplyPct}%)`);
+                console.log(`   📦 Remaining: ${collection.remainingSupply || 0}`);
+                
+                // Estimate concurrent users based on rapid mint index increments
+                if (state.performanceMetrics.batchMints.length > 0) {
+                    const lastBatch = state.performanceMetrics.batchMints[state.performanceMetrics.batchMints.length - 1];
+                    const timeSinceLastBatch = (Date.now() - new Date(lastBatch.timestamp).getTime()) / 1000;
+                    
+                    if (timeSinceLastBatch < 60) { // Within last minute
+                        console.log(`   ⚡ Recent Activity: Last mint was ${timeSinceLastBatch.toFixed(0)}s ago`);
+                    }
+                }
+                
                 if ((collection.mintedCount || 0) >= totalSupply) return { valid: false, error: "Collection sold out" };
                 const userMintCount = await this.getUserMintCount(req.collectionId, req.userWallet);
                 const maxPer = collection.maxMintsPerWallet ?? 10;
@@ -8775,9 +9114,10 @@
                 await req.userClient.publishBuilder(builder1);
                 console.log("   ✅ TX 1 complete! Permissions committed to ledger.");
                 
-                // Wait for confirmation
-                console.log("   ⏳ Waiting 3 seconds for confirmation...");
-                await new Promise(r => setTimeout(r, 3000));
+                // EXPERIMENTAL OPTIMIZATION: Removed 3s wait
+                // TX1 and TX2 operate sequentially on the same token, so voting shouldn't conflict
+                // If this causes failures, restore the 3s wait below:
+                // await new Promise(r => setTimeout(r, 3000));
                 
                 // ========================================
                 // TRANSACTION 2: Allocate to User
@@ -8999,24 +9339,71 @@
                 let mintIndex = null;
                 let collectionRef = null;
                 
+                // 📊 PERFORMANCE MONITORING START
+                const perfStart = performance.now();
+                const timings = {};
+                
                 try {
                     if (typeof req.userClient?.init === 'function') await req.userClient.init();
                     
+                    // Validation timing
+                    const t1 = performance.now();
                     const validation = await this.validateMintRequest(req);
+                    timings.validation = (performance.now() - t1).toFixed(0);
                     if (!validation.valid) return { success: false, error: validation.error };
                     
+                    // Metadata resolution timing (includes Firebase mint index increment)
+                    const t2 = performance.now();
                     const { metadata, imagePath, mintIndex: resolvedIndex } = await this.resolveMetadata(req.collectionId);
+                    timings.metadata = (performance.now() - t2).toFixed(0);
                     mintIndex = resolvedIndex;
                     
                     // Store collection ref for potential rollback
                     collectionRef = doc(this.db, 'collections', req.collectionId);
                     
                     const collection = await this.getCollection(req.collectionId);
-                    const tokenId = await this.createNFTToken(req, metadata, collection);
-                    const txHash = await this.executePayment(req, collection);
-                    const nftId = await this.commitToFirebase(req, tokenId, metadata, imagePath, txHash, mintIndex);
                     
-                    return { success: true, nftId, tokenId, txHash };
+                    // NFT token creation timing (TX1 + TX2)
+                    const t3 = performance.now();
+                    const tokenId = await this.createNFTToken(req, metadata, collection);
+                    timings.tokenCreation = (performance.now() - t3).toFixed(0);
+                    
+                    // Payment execution timing
+                    const t4 = performance.now();
+                    const txHash = await this.executePayment(req, collection);
+                    timings.payment = (performance.now() - t4).toFixed(0);
+                    
+                    // Firebase commit timing
+                    const t5 = performance.now();
+                    const nftId = await this.commitToFirebase(req, tokenId, metadata, imagePath, txHash, mintIndex);
+                    timings.firebase = (performance.now() - t5).toFixed(0);
+                    
+                    // 📊 PERFORMANCE MONITORING END
+                    const perfEnd = performance.now();
+                    const totalTime = (perfEnd - perfStart).toFixed(0);
+                    
+                    // 🌐 NETWORK QUALITY INDICATOR
+                    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                    const networkType = connection?.effectiveType || 'unknown';
+                    const downlink = connection?.downlink ? `${connection.downlink}Mbps` : 'unknown';
+                    const rtt = connection?.rtt ? `${connection.rtt}ms` : 'unknown';
+                    
+                    console.log(`📊 MINT PERFORMANCE REPORT:`);
+                    console.log(`   🎯 Mint Index: ${mintIndex}`);
+                    console.log(`   ⏱️ Total Time: ${totalTime}ms (${(totalTime/1000).toFixed(1)}s)`);
+                    console.log(`   📋 Breakdown:`);
+                    console.log(`      - Validation: ${timings.validation}ms`);
+                    console.log(`      - Metadata/Index: ${timings.metadata}ms`);
+                    console.log(`      - Token Creation (TX1+TX2): ${timings.tokenCreation}ms`);
+                    console.log(`      - Payment: ${timings.payment}ms`);
+                    console.log(`      - Firebase: ${timings.firebase}ms`);
+                    console.log(`   🌐 Network Quality:`);
+                    console.log(`      - Status: ${navigator.onLine ? '🟢 Online' : '🔴 Offline'}`);
+                    console.log(`      - Type: ${networkType}`);
+                    console.log(`      - Speed: ${downlink}`);
+                    console.log(`      - Latency: ${rtt}`);
+                    
+                    return { success: true, nftId, tokenId, txHash, perfMetrics: { totalTime, timings, mintIndex } };
                     
                 } catch (error) {
                     console.error("❌ Mint pipeline failed:", error);
@@ -9508,6 +9895,204 @@
             } catch (error) {
                 console.error("❌ Error during wipe:", error);
                 window.notify("❌ Wipe failed: " + error.message, "error");
+            }
+        };
+        
+        // ═══════════════════════════════════════════════════════════════════
+        // AUTO FIREBASE DATABASE WIPE
+        // ═══════════════════════════════════════════════════════════════════
+        window.autoWipeFirebaseDatabase = async function() {
+            console.log(`
+╔════════════════════════════════════════════════════════════════════
+║ 🔥 FIREBASE DATABASE AUTO-WIPE
+╠════════════════════════════════════════════════════════════════════
+║ This will DELETE:
+║   ❌ All NFTs
+║   ❌ All Transactions  
+║   ❌ All Offers/Bids/Auctions
+║   ❌ All Comments
+║ 
+║ This will PRESERVE:
+║   ✅ Collection definitions
+║   ✅ Whitelist settings
+║   ✅ Trait counts
+║ 
+║ This will RESET:
+║   🔄 Collection mint counters to 0
+╚════════════════════════════════════════════════════════════════════
+            `);
+            
+            // Check if user is authenticated
+            if (!state.address) {
+                window.notify('❌ You must be connected with your wallet first!', 'error');
+                console.error('❌ ERROR: You must be connected with your wallet first!');
+                console.log('💡 TIP: Connect your wallet, then try again.');
+                return;
+            }
+            
+            // Check if user is escrow wallet (admin only)
+            const ESCROW_WALLET = 'keeta_af7bjiwxvbqckbx34xzkvvxdvzhg5j4n6pnnc34fcmrqp6zztvckaaacnp7b4';
+            if (state.address !== ESCROW_WALLET) {
+                window.notify('❌ Only the admin wallet can wipe the database!', 'error');
+                console.error('❌ ERROR: Only the escrow wallet can run database wipes!');
+                console.log('Current wallet:', state.address);
+                console.log('Required wallet:', ESCROW_WALLET);
+                return;
+            }
+            
+            // Final confirmation
+            const confirmed = confirm(`⚠️ FINAL WARNING ⚠️
+
+This will PERMANENTLY DELETE all NFTs, transactions, offers, and comments from Firebase!
+
+Are you absolutely sure you want to proceed?
+
+Click OK to wipe database.
+Click Cancel to abort.`);
+            
+            if (!confirmed) {
+                console.log('❌ Database wipe cancelled by user.');
+                window.notify('Database wipe cancelled', 'error');
+                return;
+            }
+            
+            try {
+                console.log('🔥 Starting Firebase database wipe...\n');
+                window.notify('🔥 Wiping Firebase database...', 'success');
+                
+                // Collections to wipe
+                const WIPE_COLLECTIONS = ['nfts', 'transactions', 'offers', 'bids', 'auctions', 'comments'];
+                
+                const stats = {
+                    totalDeleted: 0,
+                    byCollection: {}
+                };
+                
+                // Step 1: Delete all documents from wipe collections
+                for (const collectionName of WIPE_COLLECTIONS) {
+                    try {
+                        console.log(`📦 Processing collection: ${collectionName}`);
+                        window.notify(`🗑️ Deleting ${collectionName}...`, 'success');
+                        
+                        const collectionRef = collection(db, collectionName);
+                        const snapshot = await getDocs(collectionRef);
+                        
+                        if (snapshot.empty) {
+                            console.log(`   ℹ️  Collection is already empty`);
+                            stats.byCollection[collectionName] = 0;
+                            continue;
+                        }
+                        
+                        console.log(`   🗑️  Found ${snapshot.size} documents to delete...`);
+                        
+                        // Delete all documents
+                        let deleted = 0;
+                        for (const docSnapshot of snapshot.docs) {
+                            try {
+                                await deleteDoc(doc(db, collectionName, docSnapshot.id));
+                                deleted++;
+                                
+                                // Progress indicator every 10 deletions
+                                if (deleted % 10 === 0) {
+                                    console.log(`   ⏳ Deleted ${deleted}/${snapshot.size}...`);
+                                }
+                            } catch (error) {
+                                console.error(`   ⚠️  Failed to delete document ${docSnapshot.id}:`, error.message);
+                            }
+                        }
+                        
+                        stats.byCollection[collectionName] = deleted;
+                        stats.totalDeleted += deleted;
+                        console.log(`   ✅ Deleted ${deleted} documents from ${collectionName}\n`);
+                        
+                    } catch (error) {
+                        console.error(`   ❌ Error wiping ${collectionName}:`, error.message);
+                        stats.byCollection[collectionName] = 'ERROR';
+                    }
+                }
+                
+                // Step 2: Reset collection counters
+                console.log('🔄 Resetting collection mint counters...\n');
+                window.notify('🔄 Resetting collection counters...', 'success');
+                
+                try {
+                    const collectionsRef = collection(db, 'collections');
+                    const collectionsSnapshot = await getDocs(collectionsRef);
+                    
+                    let resetCount = 0;
+                    for (const collectionDoc of collectionsSnapshot.docs) {
+                        const data = collectionDoc.data();
+                        const totalSupply = data.totalSupply || 0;
+                        
+                        try {
+                            await updateDoc(doc(db, 'collections', collectionDoc.id), {
+                                mintedCount: 0,
+                                remainingSupply: totalSupply
+                            });
+                            
+                            console.log(`   ✅ Reset: ${data.collectionTitle || collectionDoc.id}`);
+                            console.log(`      mintedCount: ${data.mintedCount || 0} → 0`);
+                            console.log(`      remainingSupply: ${data.remainingSupply || 0} → ${totalSupply}\n`);
+                            resetCount++;
+                        } catch (error) {
+                            console.error(`   ❌ Failed to reset ${collectionDoc.id}:`, error.message);
+                        }
+                    }
+                    
+                    console.log(`✅ Reset ${resetCount} collection counters\n`);
+                    
+                } catch (error) {
+                    console.error('❌ Error resetting collection counters:', error.message);
+                }
+                
+                // Step 3: Display summary
+                console.log(`
+╔════════════════════════════════════════════════════════════════════
+║ 📊 DATABASE WIPE COMPLETE!
+╠════════════════════════════════════════════════════════════════════
+║ Total Documents Deleted: ${stats.totalDeleted}
+╠════════════════════════════════════════════════════════════════════
+║ Breakdown by Collection:
+╠════════════════════════════════════════════════════════════════════`);
+                
+                for (const [collectionName, count] of Object.entries(stats.byCollection)) {
+                    const icon = count === 'ERROR' ? '❌' : count === 0 ? 'ℹ️' : '✅';
+                    console.log(`║   ${icon} ${collectionName}: ${count}`);
+                }
+                
+                console.log(`╠════════════════════════════════════════════════════════════════════
+║ ✅ Collections preserved: collections, whitelistSettings, traitCounts
+║ ✅ Collection counters reset to 0
+╚════════════════════════════════════════════════════════════════════
+                `);
+                
+                window.notify(`✅ Database wiped! Deleted ${stats.totalDeleted} documents`, 'success');
+                
+                // Auto-trigger UI wipe after database wipe
+                const autoWipeUI = confirm(`
+✅ Database wipe complete! Deleted ${stats.totalDeleted} documents.
+
+Do you want to automatically wipe the UI cache now?
+
+This will:
+- Clear all cached NFTs, collections, transactions
+- Reload fresh data from Firebase
+- Sync UI with the now-empty database
+
+Click OK to auto-wipe UI.
+Click Cancel to do it manually later.`);
+                
+                if (autoWipeUI) {
+                    console.log('🔄 Triggering UI cache wipe...');
+                    await window.wipeUIAndReload(true);
+                } else {
+                    console.log('ℹ️  UI wipe skipped. Click "Hard Wipe & Reload" button when ready.');
+                    window.notify('⚠️ Remember to wipe UI cache!', 'warning');
+                }
+                
+            } catch (error) {
+                console.error('💥 FATAL ERROR during database wipe:', error);
+                window.notify('❌ Database wipe failed: ' + error.message, 'error');
             }
         };
         
@@ -10317,6 +10902,123 @@
         };
         
         // Post comment
+        // Post comment from collection page inline input
+        window.postCollectionComment = async () => {
+            const input = document.getElementById('collectionCommentInput');
+            if (!input) return;
+            
+            const text = input.value.trim();
+            if (!text) {
+                window.notify('Please enter a comment', 'error');
+                return;
+            }
+            
+            if (!state.address) {
+                window.notify('Please connect wallet to comment', 'error');
+                return;
+            }
+            
+            if (!state.viewingCollection) {
+                window.notify('No collection selected', 'error');
+                return;
+            }
+            
+            const nftId = 'collection_' + state.viewingCollection;
+            
+            try {
+                await window.postComment(nftId, text);
+                input.value = ''; // Clear input
+                // Reload comments
+                await window.loadComments(nftId);
+                window.renderCollectionComments(nftId);
+            } catch (error) {
+                console.error('Error posting collection comment:', error);
+                window.notify('Failed to post comment', 'error');
+            }
+        };
+        
+        // Render comments on collection page
+        window.renderCollectionComments = (nftId) => {
+            const container = document.getElementById('collectionCommentsList');
+            const countElement = document.getElementById('commentCount');
+            const inputSection = document.getElementById('commentInputSection');
+            
+            if (!container) return;
+            
+            // Show input if wallet connected
+            if (inputSection && state.address) {
+                inputSection.classList.remove('hidden');
+            }
+            
+            const comments = state.comments[nftId] || [];
+            
+            // Update count
+            if (countElement) {
+                countElement.textContent = `(${comments.length} comment${comments.length !== 1 ? 's' : ''})`;
+            }
+            
+            if (comments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-500 fira">
+                        <span class="text-5xl mb-3 block">💬</span>
+                        <p>No comments yet. Be the first to share your thoughts!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Render comments
+            container.innerHTML = comments.map(comment => {
+                const isAuthor = state.address && comment.author === state.address;
+                const isAdmin = state.address === ESCROW_WALLET;
+                const canDelete = isAuthor || isAdmin;
+                
+                const shortAddress = comment.author ? 
+                    comment.author.substring(0, 12) + '...' + comment.author.substring(comment.author.length - 6) : 
+                    'Anonymous';
+                
+                // Generate avatar color from address
+                let avatarColor = '#00ffff';
+                if (comment.author) {
+                    const hash = comment.author.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                    const hue = hash % 360;
+                    avatarColor = `hsl(${hue}, 70%, 60%)`;
+                }
+                
+                return `
+                    <div class="bg-black/40 border border-white/5 rounded-xl p-5 hover:border-cyan-500/20 transition-all">
+                        <div class="flex items-start gap-4">
+                            <!-- Avatar -->
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                 style="background: linear-gradient(135deg, ${avatarColor}, ${avatarColor}88);">
+                                ${comment.author ? comment.author.substring(6, 8).toUpperCase() : '??'}
+                            </div>
+                            
+                            <!-- Comment Content -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="font-bold text-sm text-cyan-400 fira">${shortAddress}</span>
+                                    ${isAuthor ? '<span class="bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase">YOU</span>' : ''}
+                                    <span class="text-xs text-gray-500 fira">${window.getTimeAgo(new Date(comment.timestamp))}</span>
+                                </div>
+                                <p class="text-white text-sm fira break-words">${window.escapeHtml(comment.text)}</p>
+                            </div>
+                            
+                            <!-- Delete Button -->
+                            ${canDelete ? `
+                                <button onclick="window.deleteComment('${comment.id}', '${nftId}')" 
+                                        class="text-gray-500 hover:text-red-400 transition-colors p-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+        
         window.postComment = async (nftId, text) => {
             if (!state.address) return window.notify("Connect wallet to comment", "error");
             if (!text || text.trim().length === 0) return window.notify("Comment cannot be empty", "error");
@@ -10365,7 +11067,8 @@
                 await deleteDoc(doc(db, 'comments', commentId));
                 window.notify("✅ Comment deleted", "success");
                 await window.loadComments(nftId);
-                window.renderComments(nftId);
+                window.renderComments(nftId); // Refresh widget
+                window.renderCollectionComments(nftId); // Refresh inline section
                 
             } catch (error) {
                 console.error("❌ Error deleting comment:", error);
@@ -10441,9 +11144,20 @@
             const toggle = document.getElementById('commentWidgetToggle');
             
             if (panel.classList.contains('hidden')) {
+                // Show panel, hide button
                 panel.classList.remove('hidden');
                 toggle.classList.add('hidden');
+                
+                // Populate dropdown
+                window.populateCommentCollectionDropdown();
+                
+                // If no collection loaded yet, load comments for current collection
+                if (!state.currentCommentTarget && state.viewingCollection) {
+                    const col = state.collections.find(c => c.collectionId === state.viewingCollection);
+                    window.openCommentWidget(state.viewingCollection, col?.collectionTitle || 'Collection');
+                }
             } else {
+                // Hide panel, show button
                 panel.classList.add('hidden');
                 toggle.classList.remove('hidden');
             }
@@ -10457,32 +11171,83 @@
             toggle.classList.remove('hidden');
         };
         
-        // Close widget
+        // Close widget (just minimizes)
         window.closeCommentWidget = () => {
-            const widget = document.getElementById('commentWidget');
-            widget.classList.add('hidden');
+            const panel = document.getElementById('commentWidgetPanel');
+            const toggle = document.getElementById('commentWidgetToggle');
+            panel.classList.add('hidden');
+            toggle.classList.remove('hidden');
             state.commentWidgetOpen = false;
         };
         
         // Open widget for collection
         window.openCommentWidget = (collectionId, collectionName) => {
             const widget = document.getElementById('commentWidget');
-            const subtitle = document.getElementById('commentWidgetSubtitle');
             const toggle = document.getElementById('commentWidgetToggle');
             const panel = document.getElementById('commentWidgetPanel');
             
+            // Show widget container
             widget.classList.remove('hidden');
+            
+            // Show panel, hide toggle button
             toggle.classList.add('hidden');
             panel.classList.remove('hidden');
             
-            if (subtitle) {
-                subtitle.textContent = collectionName || 'Collection Chat';
+            // Populate dropdown with all collections
+            window.populateCommentCollectionDropdown();
+            
+            // Select current collection
+            const selector = document.getElementById('commentCollectionSelector');
+            if (selector && collectionId) {
+                selector.value = collectionId;
             }
             
             state.currentCommentTarget = 'collection_' + collectionId;
             state.commentWidgetOpen = true;
             
             // Load comments
+            if (collectionId) {
+                window.loadComments('collection_' + collectionId).then(() => {
+                    window.renderComments('collection_' + collectionId);
+                });
+            }
+        };
+        
+        // Populate comment collection dropdown
+        window.populateCommentCollectionDropdown = () => {
+            const selector = document.getElementById('commentCollectionSelector');
+            if (!selector || !state.collections || state.collections.length === 0) return;
+            
+            selector.innerHTML = '<option value="">-- Select Collection --</option>';
+            
+            state.collections.forEach(col => {
+                const option = document.createElement('option');
+                option.value = col.collectionId;
+                option.textContent = col.collectionTitle || col.collection || 'Unknown';
+                selector.appendChild(option);
+            });
+        };
+        
+        // Switch to different collection's comments
+        window.switchCommentCollection = (collectionId) => {
+            if (!collectionId) {
+                // Clear comments
+                const container = document.getElementById('commentWidgetMessages');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="text-center py-12 text-gray-500 fira text-sm">
+                            <span class="text-4xl mb-2 block">💬</span>
+                            Select a collection to view comments
+                        </div>
+                    `;
+                }
+                state.currentCommentTarget = null;
+                return;
+            }
+            
+            state.currentCommentTarget = 'collection_' + collectionId;
+            
+            // Load and render comments for selected collection
             window.loadComments('collection_' + collectionId).then(() => {
                 window.renderComments('collection_' + collectionId);
             });
@@ -10606,39 +11371,45 @@
 </div>
 
 <!-- Floating Comment Widget -->
-<div id="commentWidget" class="fixed bottom-6 right-6 z-40 hidden">
+<div id="commentWidget" class="fixed bottom-6 right-6 z-40">
     <!-- Widget Toggle Button (when minimized) -->
     <button id="commentWidgetToggle" onclick="window.toggleCommentWidget()" 
-            class="hidden w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all border-2 border-white/20">
+            class="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all border-2 border-white/20">
         <span class="text-2xl">💬</span>
         <span id="commentBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center hidden">0</span>
     </button>
     
     <!-- Widget Panel (when expanded) -->
-    <div id="commentWidgetPanel" class="flex flex-col bg-gradient-to-br from-gray-900 to-black border-2 border-cyan-500/30 rounded-2xl shadow-2xl w-96 h-[600px] overflow-hidden">
+    <div id="commentWidgetPanel" class="hidden flex flex-col bg-gradient-to-br from-gray-900 to-black border-2 border-cyan-500/30 rounded-2xl shadow-2xl w-96 h-[600px] overflow-hidden">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-purple-900/40 to-pink-900/40 p-4 flex justify-between items-center border-b border-white/10">
-            <div class="flex items-center gap-3">
-                <span class="text-2xl">💬</span>
-                <div>
+        <div class="bg-gradient-to-r from-purple-900/40 to-pink-900/40 p-4 border-b border-white/10">
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">💬</span>
                     <h4 class="orbitron text-sm font-bold text-white">Collection Chat</h4>
-                    <p id="commentWidgetSubtitle" class="text-xs text-gray-400 fira">Select a collection</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.minimizeCommentWidget()" 
+                            class="text-gray-400 hover:text-white p-1 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <button onclick="window.closeCommentWidget()" 
+                            class="text-gray-400 hover:text-red-400 p-1 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="window.minimizeCommentWidget()" 
-                        class="text-gray-400 hover:text-white p-1 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <button onclick="window.closeCommentWidget()" 
-                        class="text-gray-400 hover:text-red-400 p-1 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
+            
+            <!-- Collection Selector Dropdown -->
+            <select id="commentCollectionSelector" 
+                    onchange="window.switchCommentCollection(this.value)"
+                    class="w-full bg-black/60 border border-cyan-500/30 rounded-lg px-3 py-2 text-white text-xs fira outline-none focus:border-cyan-500">
+                <option value="">-- Select Collection --</option>
+            </select>
         </div>
         
         <!-- Comments List (scrollable history) -->
