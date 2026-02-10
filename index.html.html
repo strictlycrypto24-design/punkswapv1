@@ -738,14 +738,28 @@
                 </div>
 
                 <div class="flex justify-between items-center">
-                    <h2 class="orbitron text-3xl font-black uppercase italic tracking-tighter text-white">Trending Collections</h2>
+                    <div>
+                        <h2 class="orbitron text-3xl font-black uppercase italic tracking-tighter text-white">Trending Collections</h2>
+                        <p class="fira text-xs text-gray-500 mt-1">Collections sorted by 24h trading volume</p>
+                    </div>
                     <input type="text" id="marketSearch" oninput="window.renderMarketplace()" placeholder="Search Matrix ID..." class="w-80 bg-black/40 border border-white/5 rounded-lg px-4 py-2 fira text-xs text-cyan-400 outline-none focus:border-cyan-500">
                 </div>
                 
                 <div id="collectionListGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
 
                 <div class="pt-16 border-t border-white/5 space-y-8">
-                    <h3 class="orbitron text-lg font-black uppercase text-magenta-500 tracking-widest italic">Active Blind Drops</h3>
+                    <div>
+                        <h3 class="orbitron text-lg font-black uppercase text-cyan-500 tracking-widest italic">⚡ Active Collections</h3>
+                        <p class="fira text-xs text-gray-500 mt-1">All collections available for minting</p>
+                    </div>
+                    <div id="regularCollectionGrid" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
+                </div>
+
+                <div class="pt-16 border-t border-white/5 space-y-8">
+                    <div>
+                        <h3 class="orbitron text-lg font-black uppercase text-magenta-500 tracking-widest italic">🎲 Unminted Mystery Drops</h3>
+                        <p class="fira text-xs text-gray-500 mt-1">Blind mint collections - contents revealed after first mint</p>
+                    </div>
                     <div id="dropGrid" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
                 </div>
             </section>
@@ -1840,10 +1854,12 @@
         
         // ⚡ PARALLEL MINTING CONFIGURATION (Optimized for Keeta blockchain)
         const PARALLEL_MINT_CONFIG = {
-            CHUNK_SIZE: 1,               // Mints per batch (1 = sequential for blockchain stability)
-            SHOW_SPEED_STATS: true,      // Show minting speed in notifications  
-            MAX_RETRIES: 0,              // Retry failed mints (0 = no retry for speed)
-            ENABLE_OPTIMISTIC_UI: true   // Show NFTs immediately before blockchain confirm ⚡
+            CHUNK_SIZE: 1,                // Mints per batch (1 = sequential for blockchain stability)
+            SHOW_SPEED_STATS: true,       // Show minting speed in notifications  
+            MAX_RETRIES: 0,               // Retry failed mints (0 = no retry for speed)
+            ENABLE_OPTIMISTIC_UI: true,   // Show NFTs immediately before blockchain confirm ⚡
+            INTER_MINT_DELAY_MS: 1000,    // Delay between sequential mints (ms) - Min 1000ms recommended
+            AGGRESSIVE_MODE: false        // ⚡ EXPERIMENTAL: Reduce inter-mint delay to 500ms (MAY CAUSE CONFLICTS!)
         };
 
         // ═══════════════════════════════════════════════════════════════════
@@ -3607,7 +3623,7 @@
                         window.renderCollection();
                         await window.loadCollections();
                         await window.loadTraitCounts();
-                    }, 2000);
+                    }, 500);
                 } else {
                     // Only show failure if result.success is false
                     console.error("❌ Mint pipeline failed:", result.error);
@@ -3750,11 +3766,15 @@
                         }
                     }
                     
-                    // SAFETY: 2-second buffer between mints for voting system
-                    // This ensures the previous mint's transactions are fully confirmed
+                    // SAFETY: Configurable buffer between mints for voting system
+                    // Uses PARALLEL_MINT_CONFIG.INTER_MINT_DELAY_MS (default 1000ms)
+                    // Or 500ms if AGGRESSIVE_MODE is enabled (experimental)
                     if (i < quantity - 1) {
-                        console.log("⏳ Waiting 2s before next mint...");
-                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        const delayMs = PARALLEL_MINT_CONFIG.AGGRESSIVE_MODE 
+                            ? 500 
+                            : PARALLEL_MINT_CONFIG.INTER_MINT_DELAY_MS;
+                        console.log(`⏳ Waiting ${delayMs}ms before next mint...${PARALLEL_MINT_CONFIG.AGGRESSIVE_MODE ? ' ⚡ AGGRESSIVE MODE' : ''}`);
+                        await new Promise(resolve => setTimeout(resolve, delayMs));
                     }
                     
                     // Progress update
@@ -4273,19 +4293,26 @@
         // Collection rendering and Forge functions
         window.renderCollections = () => {
             console.log("🎲 renderCollections called");
-            const container = document.getElementById('dropGrid');
-            if (!container) {
-                console.error("❌ dropGrid element not found!");
+            const blindDropContainer = document.getElementById('dropGrid');
+            const regularContainer = document.getElementById('regularCollectionGrid');
+            
+            if (!blindDropContainer || !regularContainer) {
+                console.error("❌ Collection grid elements not found!");
                 return;
             }
-            console.log("📊 Active collections:", state.collections.filter(c => c.blindMintEnabled && c.remainingSupply > 0).length);
             
-            const activeCollections = state.collections.filter(c => c.blindMintEnabled && c.remainingSupply > 0);
+            const activeCollections = state.collections.filter(c => c.remainingSupply > 0);
+            console.log("📊 Active collections:", activeCollections.length);
             
-            if (activeCollections.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center text-gray-500 fira text-sm py-20">No active blind drops</div>';
-                return;
-            }
+            // Active Collections: Show ALL collections that have supply remaining
+            // This includes both regular mints and blind mints (even after first mint)
+            
+            // Blind Drops: Only show blind mint collections that haven't been minted yet
+            const blindDrops = activeCollections.filter(c => 
+                c.blindMintEnabled === true && c.mintedCount === 0
+            );
+            
+            console.log(`   🎲 Unminted Blind Drops: ${blindDrops.length}, ⚡ All Active Collections: ${activeCollections.length}`);
             
             // Array of blind mint dice/cube images - 4 different dice images rotate randomly
             const DICE_IMAGES = [
@@ -4307,13 +4334,30 @@
                 return DICE_IMAGES[index];
             };
             
-            container.innerHTML = activeCollections.map(col => {
-                const DICE_IMAGE_URL = getRandomDiceImage(col.collectionId);
+            // Render function for a single collection card
+            const renderCollectionCard = (col, isBlindMint) => {
+                
+                let displayImage;
+                if (isBlindMint) {
+                    displayImage = getRandomDiceImage(col.collectionId);
+                } else {
+                    // For regular mint: use stored preview, or construct from IPFS
+                    if (col.previewImageUrl) {
+                        displayImage = col.previewImageUrl;
+                    } else if (col.ipfsCid && col.scannedFiles && col.scannedFiles[0]) {
+                        // Construct URL from first file
+                        displayImage = `https://gateway.pinata.cloud/ipfs/${col.ipfsCid}/${col.scannedFiles[0].replace('.json', '.png')}`;
+                    } else if (col.collectionThumbnail) {
+                        displayImage = `https://gateway.pinata.cloud/ipfs/${col.collectionThumbnail}`;
+                    } else {
+                        displayImage = getRandomDiceImage(col.collectionId);
+                    }
+                }
                 
                 // Check whitelist status
                 const whitelistSettings = state.whitelistSettings[col.collectionId];
                 let buttonClass = 'btn-primary w-full py-3 group-hover:bg-cyan-500/20 transition-all';
-                let buttonText = '🎲 Mystery Forge';
+                let buttonText = isBlindMint ? '🎲 Mystery Forge' : '⚡ Mint Now';
                 let buttonDisabled = '';
                 let statusBadge = '';
                 let countdownHTML = '';
@@ -4406,15 +4450,15 @@
                 }
                 
                 return `
-                <div class="glass-card p-6 space-y-4 transition-all duration-300 group ${cardHoverClass}">
+                <div class="glass-card p-6 space-y-4 transition-all duration-300 group ${cardHoverClass} cursor-pointer" onclick="window.viewCollection('${col.collectionToken}')">
                     <div class="aspect-square bg-gradient-to-br from-purple-900/40 to-cyan-900/40 rounded-xl flex items-center justify-center overflow-hidden border border-cyan-500/30 shadow-[0_0_30px_rgba(0,255,255,0.2)] relative group-hover:shadow-[0_0_50px_rgba(0,255,255,0.4)] transition-all duration-300">
                         ${statusBadge}
                         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDIwIDAgTCAwIDAgMCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDAsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjAuNSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-20"></div>
-                        <img src="${DICE_IMAGE_URL}" 
+                        <img src="${displayImage}" 
                              class="w-full h-full object-cover relative z-10 group-hover:scale-110 transition-transform duration-300 sharp-img will-change-transform" 
                              style="transform-origin: center; backface-visibility: hidden;"
                              onerror="this.style.display='none';this.parentElement.innerHTML+='<div class=\\'text-8xl relative z-10 animate-pulse\\' style=\\'filter: drop-shadow(0 0 20px rgba(0,255,255,0.5));\\'>🎲</div>'" 
-                             alt="Mystery Drop"/>
+                             alt="${isBlindMint ? 'Mystery Drop' : col.collectionTitle}"/>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
@@ -4450,12 +4494,35 @@
                         <span class="fira text-xs text-gray-500">NFTs</span>
                     </div>
                     
-                    <button class="${buttonClass}" ${buttonDisabled} onclick="${buttonDisabled ? '' : `window.mintMultipleFromCollection('${col.collectionId}')`}">
+                    <button class="${buttonClass}" ${buttonDisabled} onclick="event.stopPropagation(); ${buttonDisabled ? '' : `window.mintMultipleFromCollection('${col.collectionId}')`}">
                         ${buttonText}
                     </button>
                 </div>
             `;
-            }).join('');
+            };
+            
+            // Render blind drops (only unminted mystery drops)
+            if (blindDrops.length === 0) {
+                blindDropContainer.innerHTML = '<div class="col-span-full text-center text-gray-500 fira text-sm py-20">No unminted blind drops</div>';
+            } else {
+                blindDropContainer.innerHTML = blindDrops.map(col => renderCollectionCard(col, true)).join('');
+            }
+            
+            // Render Active Collections (EXCLUDE unminted blind drops - they only show in Mystery Drops section)
+            const collectionsForActiveSection = activeCollections.filter(c => 
+                // Exclude blind mints that haven't been minted yet
+                !(c.blindMintEnabled === true && c.mintedCount === 0)
+            );
+            
+            if (collectionsForActiveSection.length === 0) {
+                regularContainer.innerHTML = '<div class="col-span-full text-center text-gray-500 fira text-sm py-20">No active collections</div>';
+            } else {
+                regularContainer.innerHTML = collectionsForActiveSection.map(col => {
+                    // These are either regular mints OR blind mints that have been revealed (mintedCount > 0)
+                    // Show preview images for all since blind mints here are already revealed
+                    return renderCollectionCard(col, false);
+                }).join('');
+            }
             
             // Start countdown timers if any
             window.startCountdownTimers?.();
@@ -4565,7 +4632,9 @@
                     pricePunks: state.priceMode !== 'kta' ? punksVal : 0,
                     maxMintsPerWallet, blindMintEnabled: isDrop,
                     collectionDesc: desc || "Metadata encrypted.",
-                    collectionThumbnailCid: colThumb, creator: state.address,
+                    collectionThumbnailCid: colThumb, 
+                    previewImageUrl: state.previewImageUrl || '',
+                    creator: state.address,
                     createdBy: state.address, createdAt: new Date().toISOString(),
                     creatorRoyaltyPercent: creatorRoyalty / 100, // Convert 5 to 0.05
                     scannedFiles: mintOrder
@@ -4579,6 +4648,7 @@
                 document.getElementById('collectionDescInput').value = '';
                 document.getElementById('collectionThumbnailInput').value = '';
                 state.scannedFiles = [];
+                state.previewImageUrl = '';
                 document.getElementById('forgeReadyArea')?.classList.add('hidden');
                 
                 await window.loadCollections();
@@ -4724,14 +4794,16 @@
                                 imageUrl = meta.image.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
                             } else if (meta.image.startsWith('http')) {
                                 imageUrl = meta.image;
-                            } else if (meta.image.includes('/')) {
-                                imageUrl = `https://gateway.pinata.cloud/ipfs/${meta.image}`;
                             } else {
+                                // All relative paths need CID prepended
                                 imageUrl = `https://gateway.pinata.cloud/ipfs/${cid}/${meta.image}`;
                             }
                         }
                         
                         console.log("📸 Image URL:", imageUrl);
+                        
+                        // Store preview URL in state for collection creation
+                        state.previewImageUrl = imageUrl;
                         
                         const previewContainer = document.getElementById('previewImageContainer');
                         if (previewContainer && imageUrl) {
@@ -8931,9 +9003,8 @@
                 const userMintCount = await this.getUserMintCount(req.collectionId, req.userWallet);
                 const maxPer = collection.maxMintsPerWallet ?? 10;
                 if (userMintCount >= maxPer) return { valid: false, error: `Max ${maxPer} mints per wallet` };
-                if (typeof window.loadWhitelistSettings === 'function' && !state.whitelistSettings?.[req.collectionId]) {
-                    await window.loadWhitelistSettings(req.collectionId);
-                }
+                // Whitelist settings should already be loaded during initialization
+                // Don't load during validation - this causes 12s delay!
                 const ws = state.whitelistSettings?.[req.collectionId];
                 if (ws?.enabled) {
                     const mintType = collection.blindMintEnabled ? 'BLIND_MINT' : 'STANDARD_MINT';
@@ -8978,8 +9049,12 @@
 
             async resolveMetadata(collectionId) {
                 console.log("📄 [STEP 2] Resolving metadata...");
-                const collection = await this.getCollection(collectionId);
-                const mintIndex = await this.getAndIncrementMintIndex(collectionId);
+                
+                // ⚡ OPTIMIZATION: Fetch collection and increment index in PARALLEL
+                const [collection, mintIndex] = await Promise.all([
+                    this.getCollection(collectionId),
+                    this.getAndIncrementMintIndex(collectionId)
+                ]);
                 
                 console.log(`📊 Collection info:`, {
                     blindMintEnabled: collection.blindMintEnabled,
@@ -9003,7 +9078,8 @@
                     console.log(`📝 Sequential mint: Index ${mintIndex} → File ${filename}`);
                 }
                 
-                const gateways = ['https://ipfs.io/ipfs', 'https://gateway.pinata.cloud/ipfs', 'https://cloudflare-ipfs.com/ipfs'];
+                // ⚡ OPTIMIZATION: Only use 2 fastest gateways (Pinata + IPFS.io)
+                const gateways = ['https://gateway.pinata.cloud/ipfs', 'https://ipfs.io/ipfs'];
                 let metadata = null;
                 
                 // Clean CID and filename to prevent double slashes and remove ipfs:// protocol
@@ -9018,26 +9094,32 @@
                 
                 console.log(`🔗 Final URL components: CID=${cleanCid.substring(0, 20)}... File=${cleanFilename}`);
                 
-                for (const gw of gateways) {
-                    try {
+                // ⚡ OPTIMIZATION: Try both gateways, use first successful response
+                // Use Promise.allSettled to handle failures gracefully
+                try {
+                    const fetchPromises = gateways.map(async (gw) => {
                         const metaUrl = `${gw}/${cleanCid}/${cleanFilename}`;
                         console.log(`🔍 Trying: ${metaUrl}`);
                         const res = await fetch(metaUrl);
-                        if (res.ok) { 
-                            metadata = await res.json(); 
-                            console.log(`✅ Metadata loaded from: ${gw}`);
-                            break; 
-                        } else {
-                            console.warn(`⚠️ Gateway returned ${res.status}: ${gw}`);
-                        }
-                    } catch (e) { 
-                        console.warn(`❌ Gateway failed (${e.message}): ${gw}`); 
-                        continue; 
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        const data = await res.json();
+                        console.log(`✅ Metadata loaded from: ${gw}`);
+                        return data;
+                    });
+                    
+                    // Use allSettled to get all results, then find first success
+                    const results = await Promise.allSettled(fetchPromises);
+                    const successResult = results.find(r => r.status === 'fulfilled');
+                    
+                    if (successResult) {
+                        metadata = successResult.value;
+                    } else {
+                        // All failed, throw with details
+                        const errors = results.map((r, i) => `${gateways[i]}: ${r.reason?.message || 'unknown'}`).join(', ');
+                        throw new Error(`All gateways failed: ${errors}`);
                     }
-                }
-                
-                if (!metadata) {
-                    console.error(`❌ All gateways failed for: ${cleanCid}/${cleanFilename}`);
+                } catch (e) {
+                    console.error(`❌ All gateways failed:`, e);
                     throw new Error(`Metadata fetch failed: ${cleanCid}/${cleanFilename}`);
                 }
                 
@@ -9185,14 +9267,15 @@
                 return txHash;
             }
 
-            async commitToFirebase(req, tokenId, metadata, imagePath, txHash, mintIndex) {
+            async commitToFirebase(req, tokenId, metadata, imagePath, txHash, mintIndex, collection) {
                 console.log("💾 [STEP 5] Committing to Firebase...");
                 console.log("TX Hash being saved:", txHash || "(none)");
                 if (!txHash) {
                     console.warn("⚠️ WARNING: Committing NFT without transaction hash");
                     console.warn("This means hash extraction failed earlier in the pipeline");
                 }
-                const collection = await this.getCollection(req.collectionId);
+                // OPTIMIZATION: Use passed collection instead of fetching again
+                // const collection = await this.getCollection(req.collectionId);
                 const docId = `nft_${getNormalizedId(collection.collectionToken || collection.id)}_${mintIndex}`;
                 
                 // Create unique symbol from collection title
@@ -9234,7 +9317,8 @@
                     nftName = `${nftName} No ${mintIndex}`;
                 }
                 
-                await setDoc(doc(this.db, 'nfts', docId), {
+                // OPTIMIZATION: Execute independent Firebase writes in parallel
+                const nftDoc = setDoc(doc(this.db, 'nfts', docId), {
                     id: docId,
                     tokenId,
                     owner: req.userWallet,
@@ -9265,22 +9349,45 @@
                     wasBlindMinted: !!collection.blindMintEnabled,
                     externalUrl: metadata.external_url || ''
                 });
-                const walletTrackingRef = doc(this.db, 'walletMintTracking', `${req.userWallet}_${req.collectionId}`);
-                const trackingSnap = await getDoc(walletTrackingRef);
-                const currentCount = trackingSnap.exists() ? trackingSnap.data().mintedCount : 0;
-                await setDoc(walletTrackingRef, { walletAddress: req.userWallet, collectionId: req.collectionId, mintedCount: currentCount + 1 });
-                const ws = state.whitelistSettings?.[req.collectionId];
-                if (ws?.enabled) {
-                    const wallets = state.whitelistWallets?.[req.collectionId] || [];
-                    const entry = wallets.find(w => (w.walletAddress || '').toLowerCase() === req.userWallet.toLowerCase());
-                    if (entry) {
-                        try {
-                            const walletRef = doc(this.db, 'whitelistWallets', entry.id);
-                            await updateDoc(walletRef, { usedMints: (entry.usedMints || 0) + 1 });
-                        } catch (e) { console.warn("Whitelist usage increment failed:", e); }
+                
+                // Wallet tracking - can run in parallel
+                const walletTrackingPromise = (async () => {
+                    const walletTrackingRef = doc(this.db, 'walletMintTracking', `${req.userWallet}_${req.collectionId}`);
+                    const trackingSnap = await getDoc(walletTrackingRef);
+                    const currentCount = trackingSnap.exists() ? trackingSnap.data().mintedCount : 0;
+                    await setDoc(walletTrackingRef, { walletAddress: req.userWallet, collectionId: req.collectionId, mintedCount: currentCount + 1 });
+                })();
+                
+                // Whitelist update - can run in parallel
+                const whitelistPromise = (async () => {
+                    const ws = state.whitelistSettings?.[req.collectionId];
+                    if (ws?.enabled) {
+                        const wallets = state.whitelistWallets?.[req.collectionId] || [];
+                        const entry = wallets.find(w => (w.walletAddress || '').toLowerCase() === req.userWallet.toLowerCase());
+                        if (entry) {
+                            try {
+                                const walletRef = doc(this.db, 'whitelistWallets', entry.id);
+                                await updateDoc(walletRef, { usedMints: (entry.usedMints || 0) + 1 });
+                            } catch (e) { console.warn("Whitelist usage increment failed:", e); }
+                        }
                     }
-                }
-                await window.recordTransaction?.({ type: 'mint', nftId: docId, nftName: metadata.name, collection: collection.collectionTitle, collectionId: req.collectionId, counterParty: collection.creator, price: collection.priceKTA, currency: 'KTA', txHash });
+                })();
+                
+                // Transaction recording - can run in parallel
+                const txRecordPromise = window.recordTransaction?.({ 
+                    type: 'mint', 
+                    nftId: docId, 
+                    nftName: metadata.name, 
+                    collection: collection.collectionTitle, 
+                    collectionId: req.collectionId, 
+                    counterParty: collection.creator, 
+                    price: collection.priceKTA, 
+                    currency: 'KTA', 
+                    txHash 
+                });
+                
+                // Wait for all parallel operations to complete
+                await Promise.all([nftDoc, walletTrackingPromise, whitelistPromise, txRecordPromise].filter(Boolean));
                 
                 // Update trait counts for rarity calculation
                 if (metadata.attributes && metadata.attributes.length > 0) {
@@ -9346,6 +9453,9 @@
                 try {
                     if (typeof req.userClient?.init === 'function') await req.userClient.init();
                     
+                    // Store collection ref FIRST for potential rollback
+                    collectionRef = doc(this.db, 'collections', req.collectionId);
+                    
                     // Validation timing
                     const t1 = performance.now();
                     const validation = await this.validateMintRequest(req);
@@ -9357,9 +9467,6 @@
                     const { metadata, imagePath, mintIndex: resolvedIndex } = await this.resolveMetadata(req.collectionId);
                     timings.metadata = (performance.now() - t2).toFixed(0);
                     mintIndex = resolvedIndex;
-                    
-                    // Store collection ref for potential rollback
-                    collectionRef = doc(this.db, 'collections', req.collectionId);
                     
                     const collection = await this.getCollection(req.collectionId);
                     
@@ -9375,7 +9482,7 @@
                     
                     // Firebase commit timing
                     const t5 = performance.now();
-                    const nftId = await this.commitToFirebase(req, tokenId, metadata, imagePath, txHash, mintIndex);
+                    const nftId = await this.commitToFirebase(req, tokenId, metadata, imagePath, txHash, mintIndex, collection);
                     timings.firebase = (performance.now() - t5).toFixed(0);
                     
                     // 📊 PERFORMANCE MONITORING END
