@@ -196,26 +196,196 @@
             }
             
             .chart-container {
-                padding: 1rem;
+                padding: 0.75rem;
             }
             
             .chart-stats {
                 flex-wrap: wrap;
-                gap: 1rem;
+                gap: 0.5rem;
             }
             
             .chart-stat {
                 flex: 1 1 45%;
-                min-width: 120px;
+                min-width: 100px;
             }
             
             .top-bar {
-                padding: 0 1.5rem;
-                height: 70px;
+                padding: 0 1rem;
+                height: 60px;
+                gap: 0.5rem;
             }
             
             .content-scroll {
-                padding: 1.5rem;
+                padding: 1rem;
+            }
+            
+            /* Seed phrase modal - fit on mobile */
+            #seedModal {
+                padding: 1rem !important;
+            }
+            #seedModal > div {
+                padding: 1.5rem !important;
+                max-width: 100% !important;
+            }
+            #seedModal h2 {
+                font-size: 1.2rem !important;
+            }
+            #seedModal .grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 0.5rem !important;
+            }
+            #seedModal button {
+                padding: 0.75rem 1.5rem !important;
+                font-size: 0.7rem !important;
+            }
+            .seed-box {
+                padding: 10px 6px !important;
+                font-size: 12px !important;
+            }
+            
+            /* Listing modal - stack vertically on mobile */
+            #listingModal > div {
+                padding: 1.5rem !important;
+                max-width: 100% !important;
+                margin: 1rem;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            #listingModal .grid-cols-2 {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Collection page header - stack on mobile */
+            #collectionPageHeader {
+                flex-direction: column !important;
+                padding: 1.5rem !important;
+                gap: 1rem !important;
+            }
+            #collectionPageHeader > div:first-child {
+                width: 100px !important;
+                height: 100px !important;
+                margin: 0 auto;
+            }
+            #colPageTitle {
+                font-size: 1.5rem !important;
+                text-align: center;
+            }
+            #collectionPageHeader .flex.gap-10 {
+                flex-wrap: wrap;
+                gap: 1rem !important;
+                justify-content: center;
+            }
+            
+            /* Header balance display - smaller text */
+            #balanceKTA, #balancePunks, #balanceEscrow {
+                font-size: 0.75rem !important;
+            }
+            
+            /* Glass cards - reduce padding */
+            .glass-card {
+                border-radius: 0.75rem;
+            }
+            .glass-card[class*="p-12"] {
+                padding: 1.5rem !important;
+            }
+            .glass-card[class*="p-10"] {
+                padding: 1.25rem !important;
+            }
+            .glass-card[class*="p-8"] {
+                padding: 1rem !important;
+            }
+            
+            /* NFT grid - 2 columns on mobile */
+            #colPageGrid, #collectionGrid, #watchlistGrid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
+            }
+            
+            /* Collection list grid - 2 columns */
+            #collectionListGrid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
+            }
+            
+            /* Forge hub - single column */
+            #forgeContainer .grid.lg\\:grid-cols-3 {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Chart header - stack */
+            .chart-header {
+                flex-direction: column !important;
+                gap: 0.75rem !important;
+            }
+            
+            /* Chart timeframe buttons - smaller */
+            .chart-timeframe-btn {
+                padding: 0.3rem 0.6rem !important;
+                font-size: 0.55rem !important;
+            }
+            
+            /* Transaction table - horizontal scroll */
+            #transactionsTableBody {
+                font-size: 0.65rem;
+            }
+            
+            /* Escrow tracker stats - 2 cols instead of 5 */
+            .tab-content .grid.md\\:grid-cols-5 {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            
+            /* Filter row - wrap on mobile */
+            .flex.gap-4.mb-6 {
+                gap: 0.5rem !important;
+            }
+            .flex.gap-4.mb-6 input[type="text"] {
+                min-width: unset !important;
+                width: 100% !important;
+            }
+            
+            /* Mint tracker popup - full width bottom */
+            #mintTracker {
+                right: 0.5rem !important;
+                left: 0.5rem !important;
+                width: auto !important;
+            }
+            
+            /* Portfolio P/L cards - 2 cols */
+            .grid.lg\\:grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            
+            /* Tab content large headings */
+            .orbitron.text-5xl { font-size: 1.5rem !important; }
+            .orbitron.text-4xl { font-size: 1.25rem !important; }
+            .orbitron.text-3xl { font-size: 1.1rem !important; }
+            .orbitron.text-2xl { font-size: 1rem !important; }
+            
+            /* Reduce gap on mobile for all flex containers */
+            .flex.gap-12 { gap: 1rem !important; }
+            .flex.gap-10 { gap: 0.75rem !important; }
+            .flex.gap-8 { gap: 0.75rem !important; }
+            .flex.gap-6 { gap: 0.5rem !important; }
+        }
+        
+        /* Small phones */
+        @media (max-width: 400px) {
+            #colPageGrid, #collectionGrid, #watchlistGrid, #collectionListGrid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.35rem !important;
+            }
+            
+            .content-scroll {
+                padding: 0.75rem;
+            }
+            
+            .top-bar {
+                padding: 0 0.75rem;
+                height: 55px;
+            }
+            
+            #seedModal .grid {
+                grid-template-columns: repeat(2, 1fr) !important;
             }
         }
         
@@ -347,6 +517,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow-y: auto;
+            padding: 1rem;
             animation: fadeIn 0.2s ease;
         }
         
@@ -481,9 +653,10 @@
         }
         .trait-badge {
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid; /* Color set dynamically via inline style */
             border-radius: 0.5rem;
             padding: 0.65rem 0.75rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
         
         .traits-container {
@@ -679,7 +852,7 @@
                 <span class="fira text-[9px] text-gray-600 uppercase tracking-widest hidden md:block">Global Pop: <span id="statTotal" class="text-cyan-400">0</span></span>
             </div>
 
-            <div class="flex gap-6 md:gap-12">
+            <div class="flex gap-3 md:gap-12 flex-wrap justify-end">
                 <div class="text-right">
                     <div class="text-[7px] orbitron text-cyan-500 uppercase font-black tracking-widest mb-1">RESERVE KTA</div>
                     <div id="balanceKTA" class="fira text-sm md:text-lg font-black text-white">0.0000</div>
@@ -964,7 +1137,6 @@
                                 <span id="monitoringBtnText">Show Monitoring</span>
                             </button>
                             <button onclick="window.renderCollection()" class="btn-primary px-10">Refresh Storage</button>
-                            <button onclick="window.syncWalletNFTs()" class="btn-secondary px-10 ml-3">Sync Wallet</button>
                         </div>
                     </div>
                     
@@ -1045,7 +1217,12 @@
                         </div>
                         
                         <!-- Filter Options -->
-                        <div class="flex gap-4 mb-6 flex-wrap">
+                        <div class="flex gap-4 mb-6 flex-wrap items-center">
+                            <div class="inline-flex rounded-lg overflow-hidden border border-white/10">
+                                <button id="txCurrencyALL" onclick="window.setTxCurrency('ALL')" class="px-3 py-2 text-[10px] orbitron font-black bg-orange-500/30 text-orange-400 border-r border-white/10 transition-all">ALL</button>
+                                <button id="txCurrencyKTA" onclick="window.setTxCurrency('KTA')" class="px-3 py-2 text-[10px] orbitron font-black bg-black/20 text-gray-500 transition-all hover:text-white border-r border-white/10">KTA</button>
+                                <button id="txCurrencyPUNKS" onclick="window.setTxCurrency('PUNKS')" class="px-3 py-2 text-[10px] orbitron font-black bg-black/20 text-gray-500 transition-all hover:text-white">PUNKS</button>
+                            </div>
                             <select id="txTypeFilter" onchange="window.filterTransactions()" class="bg-black/60 border border-cyan-500/30 px-4 py-2 rounded-lg text-sm text-cyan-400 font-bold orbitron">
                                 <option value="all">All Types</option>
                                 <option value="sale">Sales</option>
@@ -1073,11 +1250,13 @@
                             </div>
                             <div class="bg-black/40 p-4 rounded-lg border border-green-500/20">
                                 <div class="text-xs orbitron text-gray-500 uppercase mb-1 font-bold">Total Sales</div>
-                                <div id="txTotalSales" class="text-2xl fira font-black text-green-400">0 KTA</div>
+                                <div id="txTotalSales" class="text-xl fira font-black text-green-400">0</div>
+                                <div id="txTotalSalesSub" class="text-[10px] fira text-green-400/60 mt-0.5"></div>
                             </div>
                             <div class="bg-black/40 p-4 rounded-lg border border-purple-500/20">
                                 <div class="text-xs orbitron text-gray-500 uppercase mb-1 font-bold">Total Purchases</div>
-                                <div id="txTotalPurchases" class="text-2xl fira font-black text-purple-400">0 KTA</div>
+                                <div id="txTotalPurchases" class="text-xl fira font-black text-purple-400">0</div>
+                                <div id="txTotalPurchasesSub" class="text-[10px] fira text-purple-400/60 mt-0.5"></div>
                             </div>
                             <div class="bg-black/40 p-4 rounded-lg border border-yellow-500/20">
                                 <div class="text-xs orbitron text-gray-500 uppercase mb-1 font-bold">NFTs Minted</div>
@@ -2273,8 +2452,9 @@
             listingNFT: null,
             marketPulseData: [],
             chartTimeframe: '24h',
-            chartCurrency: 'ALL',
+            chartCurrency: 'KTA',
             pnlCurrency: 'KTA',
+            txCurrency: 'ALL',
             colChartCurrency: 'KTA',
             collectionChartTimeframe: '24h',
             selectedChartCollection: 'all',
@@ -2338,6 +2518,133 @@
                 }
             });
         }, 30000);
+        
+        // Safety: clean up stale Firestore pending_purchase locks (e.g. browser crashed mid-buy)
+        // Runs on page load and every 2 minutes
+        window.cleanStalePurchaseLocks = async () => {
+            try {
+                const staleCutoff = new Date(Date.now() - 3 * 60 * 1000).toISOString(); // 3 min
+                const nftsRef = collection(db, 'nfts');
+                const q = query(nftsRef, where('status', '==', 'pending_purchase'));
+                const snap = await getDocs(q);
+                let cleaned = 0;
+                for (const d of snap.docs) {
+                    const data = d.data();
+                    if (data._pendingAt && data._pendingAt < staleCutoff) {
+                        await updateDoc(doc(db, 'nfts', d.id), {
+                            status: 'listed',
+                            _pendingBuyer: null,
+                            _pendingAt: null
+                        });
+                        cleaned++;
+                        console.warn(`🔓 Cleaned stale purchase lock on ${d.id} (pending since ${data._pendingAt})`);
+                    }
+                }
+                if (cleaned > 0) console.log(`🧹 Cleaned ${cleaned} stale purchase locks`);
+            } catch (e) {
+                // Non-critical, silently ignore
+            }
+        };
+        // Run on load (delayed) and every 2 minutes
+        setTimeout(() => window.cleanStalePurchaseLocks(), 10000);
+        setInterval(() => window.cleanStalePurchaseLocks(), 120000);
+
+        // 🔔 MINT STATUS TRACKER - Real-time progress popup
+        window.mintTracker = {
+            _timer: null,
+            _startTime: 0,
+            _stepStart: 0,
+            
+            show() {
+                const el = document.getElementById('mintTracker');
+                if (!el) return;
+                el.classList.remove('hidden');
+                this._startTime = Date.now();
+                this._stepStart = Date.now();
+                // Reset all steps
+                for (let i = 1; i <= 5; i++) {
+                    const step = document.getElementById(`mintStep${i}`);
+                    const icon = document.getElementById(`mintStep${i}Icon`);
+                    const time = document.getElementById(`mintStep${i}Time`);
+                    const detail = document.getElementById(`mintStep${i}Detail`);
+                    if (step) step.className = 'flex items-center gap-2.5 opacity-30';
+                    if (icon) { icon.innerHTML = i; icon.className = 'w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-[9px] shrink-0'; }
+                    if (time) time.textContent = '';
+                    if (detail) detail.className = 'fira text-[9px] text-gray-500';
+                }
+                document.getElementById('mintTrackerProgress').style.width = '0%';
+                document.getElementById('mintTrackerResult')?.classList.add('hidden');
+                document.getElementById('mintTrackerSpinner')?.classList.remove('hidden');
+                // Start timer
+                clearInterval(this._timer);
+                this._timer = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this._startTime) / 1000);
+                    const el = document.getElementById('mintTrackerTimer');
+                    if (el) el.textContent = `${elapsed}s`;
+                }, 1000);
+            },
+            
+            setStep(stepNum, status, detail) {
+                // status: 'active', 'done', 'error'
+                const step = document.getElementById(`mintStep${stepNum}`);
+                const icon = document.getElementById(`mintStep${stepNum}Icon`);
+                const time = document.getElementById(`mintStep${stepNum}Time`);
+                const detailEl = document.getElementById(`mintStep${stepNum}Detail`);
+                if (!step) return;
+                
+                const now = Date.now();
+                
+                if (status === 'active') {
+                    step.className = 'flex items-center gap-2.5 opacity-100';
+                    icon.className = 'w-5 h-5 rounded-full border border-cyan-400 bg-cyan-500/20 flex items-center justify-center text-[9px] text-cyan-400 shrink-0 animate-pulse';
+                    icon.innerHTML = stepNum;
+                    if (detail && detailEl) { detailEl.textContent = detail; detailEl.className = 'fira text-[9px] text-cyan-400/70'; }
+                    this._stepStart = now;
+                    // Progress: each step = 20%
+                    document.getElementById('mintTrackerProgress').style.width = `${(stepNum - 1) * 20}%`;
+                } else if (status === 'done') {
+                    const dur = ((now - this._stepStart) / 1000).toFixed(1);
+                    step.className = 'flex items-center gap-2.5 opacity-100';
+                    icon.className = 'w-5 h-5 rounded-full border border-green-400 bg-green-500/20 flex items-center justify-center text-[9px] text-green-400 shrink-0';
+                    icon.innerHTML = '✓';
+                    if (time) time.textContent = `${dur}s`;
+                    if (detail && detailEl) { detailEl.textContent = detail; detailEl.className = 'fira text-[9px] text-green-400/60'; }
+                    document.getElementById('mintTrackerProgress').style.width = `${stepNum * 20}%`;
+                } else if (status === 'error') {
+                    step.className = 'flex items-center gap-2.5 opacity-100';
+                    icon.className = 'w-5 h-5 rounded-full border border-red-400 bg-red-500/20 flex items-center justify-center text-[9px] text-red-400 shrink-0';
+                    icon.innerHTML = '✗';
+                    if (detail && detailEl) { detailEl.textContent = detail; detailEl.className = 'fira text-[9px] text-red-400/60'; }
+                }
+            },
+            
+            complete(success, message) {
+                clearInterval(this._timer);
+                const totalTime = ((Date.now() - this._startTime) / 1000).toFixed(1);
+                document.getElementById('mintTrackerTimer').textContent = `${totalTime}s`;
+                document.getElementById('mintTrackerProgress').style.width = '100%';
+                document.getElementById('mintTrackerSpinner')?.classList.add('hidden');
+                
+                const result = document.getElementById('mintTrackerResult');
+                const inner = document.getElementById('mintTrackerResultInner');
+                if (result && inner) {
+                    result.classList.remove('hidden');
+                    if (success) {
+                        inner.className = 'fira text-xs text-center py-2 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400';
+                        inner.textContent = message || `✅ Minted successfully in ${totalTime}s!`;
+                    } else {
+                        inner.className = 'fira text-xs text-center py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400';
+                        inner.textContent = message || '❌ Mint failed';
+                    }
+                }
+                // Auto-hide after 8 seconds on success
+                if (success) {
+                    setTimeout(() => {
+                        document.getElementById('mintTracker')?.classList.add('hidden');
+                    }, 8000);
+                }
+            }
+        };
 
         // Lazy-load Chart.js (saves ~200KB on initial page load, reduces ERR_INSUFFICIENT_RESOURCES)
         window.loadChartJs = () => {
@@ -2800,57 +3107,98 @@
         
         window.fetchNFTMetadata = async (nft) => {
             try {
-                if (nft.metadataCache && nft.metadataCache.attributes) {
+                // If cache already has attributes, apply them
+                if (nft.metadataCache && nft.metadataCache.attributes && nft.metadataCache.attributes.length > 0) {
+                    if (!nft.attributes || nft.attributes.length === 0) {
+                        nft.attributes = nft.metadataCache.attributes;
+                        try {
+                            await updateDoc(doc(db, 'nfts', nft.id), {
+                                attributes: nft.metadataCache.attributes,
+                                metadataFetched: true
+                            });
+                        } catch (e) { /* silent */ }
+                    }
                     return nft.metadataCache;
                 }
                 
-                const collection = state.collections.find(c => c.collectionId === nft.collectionId);
+                const isExternalNFT = nft.isExternal || nft.source === 'auto-detect' || nft.id?.startsWith('external_');
+                
+                let collection = state.collections.find(c => c.collectionId === nft.collectionId);
+                
+                // For external/PFP NFTs: build synthetic collection config
+                if (!collection && isExternalNFT) {
+                    collection = {
+                        isExternal: true,
+                        baseMetadataUrl: EXTERNAL_COLLECTION.baseMetadataUrl,
+                        baseImageUrl: EXTERNAL_COLLECTION.baseImageUrl,
+                        collectionToken: EXTERNAL_COLLECTION.collectionToken,
+                        collectionName: EXTERNAL_COLLECTION.collectionName,
+                        totalItems: EXTERNAL_COLLECTION.totalItems
+                    };
+                }
+                
                 if (!collection) {
                     console.warn("Collection not found for NFT:", nft.id);
                     return null;
                 }
                 
-                // Build metadata URL
-                let metadataUrl;
+                let metadata = null;
+                
+                // Build metadata URLs with multiple gateways
+                const nftNumber = nft.externalId || nft.id.split('_').pop();
+                let metadataUrls = [];
                 
                 if (collection.isExternal && collection.baseMetadataUrl) {
-                    // External collection (like PFP) - use externalId for the number
-                    const nftNumber = nft.externalId || nft.id.split('_').pop();
-                    metadataUrl = `${collection.baseMetadataUrl}${nftNumber}.json`;
-                    console.log(`📥 Fetching external NFT metadata #${nftNumber}: ${metadataUrl}`);
+                    const ipfsCid = collection.baseMetadataUrl
+                        .replace('https://gateway.pinata.cloud/ipfs/', '')
+                        .replace(/\/$/, '');
+                    metadataUrls = [
+                        `https://ipfs.io/ipfs/${ipfsCid}/${nftNumber}.json`,
+                        `https://dweb.link/ipfs/${ipfsCid}/${nftNumber}.json`,
+                        `https://gateway.pinata.cloud/ipfs/${ipfsCid}/${nftNumber}.json`,
+                        `https://4everland.io/ipfs/${ipfsCid}/${nftNumber}.json`
+                    ];
                 } else {
-                    // Regular internal collection
                     const mintIndex = nft.id.split('_').pop();
                     const fileName = collection.scannedFiles?.[mintIndex] || `${mintIndex}.json`;
-                    metadataUrl = `${getIPFSUrl(collection.ipfsCid)}/${fileName}`;
-                    console.log("📥 Fetching metadata:", metadataUrl);
+                    metadataUrls = [`${getIPFSUrl(collection.ipfsCid)}/${fileName}`];
                 }
                 
-                const response = await fetch(metadataUrl);
-                if (!response.ok) {
-                    // For external NFTs, try fallback: use manifest data or kee.tools
-                    if (collection.isExternal && nft.tokenId) {
-                        console.warn(`⚠️ IPFS metadata failed, using embedded data for external NFT`);
-                        // Use what we already have from manifest
-                        return {
-                            name: nft.name,
-                            description: nft.description,
-                            image: nft.image || `${collection.baseImageUrl || 'https://pfponkeeta.xyz/images/'}${nft.externalId}.png`,
-                            attributes: nft.attributes || []
-                        };
-                    }
-                    throw new Error(`Metadata fetch failed: ${response.status}`);
+                console.log(`📥 Trying ${metadataUrls.length} gateways for #${nftNumber} metadata...`);
+                
+                for (const url of metadataUrls) {
+                    try {
+                        const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+                        if (response.ok) {
+                            const fetched = await response.json();
+                            if (fetched?.attributes?.length > 0) {
+                                metadata = fetched;
+                                console.log(`✅ Got ${fetched.attributes.length} traits from: ${url.substring(0, 50)}...`);
+                                break;
+                            }
+                        }
+                    } catch (e) { /* try next gateway */ }
                 }
                 
-                const metadata = await response.json();
+                if (!metadata || !metadata.attributes || metadata.attributes.length === 0) {
+                    console.warn(`⚠️ No traits found for ${nft.id} from any gateway`);
+                    return null;
+                }
+                
+                // Save to Firebase and in-memory
                 nft.metadataCache = metadata;
+                nft.attributes = metadata.attributes;
                 
-                if (metadata.attributes && Array.isArray(metadata.attributes)) {
+                try {
                     await updateDoc(doc(db, 'nfts', nft.id), {
                         attributes: metadata.attributes,
                         metadataFetched: true,
-                        lastMetadataUpdate: new Date().toISOString()
+                        lastMetadataUpdate: new Date().toISOString(),
+                        metadataCache: metadata
                     });
+                    console.log(`💾 Saved ${metadata.attributes.length} traits for ${nft.id}`);
+                } catch (e) {
+                    console.warn(`⚠️ Could not save traits to Firebase: ${e.message}`);
                 }
                 
                 return metadata;
@@ -2875,19 +3223,23 @@
             
             const traitsHTML = nft.attributes.map((trait, index) => {
                 const traitRarity = window.calculateTraitRarity(trait, nft.collectionId, totalMinted);
-                const tier = window.getRarityTier(traitRarity);
+                const tier = window.getRarityTier(traitRarity, totalMinted);
                 
                 // Clean trait_type: remove leading numbers (handles "1 BACKGROUND", "3 BODY", etc.)
                 const cleanTraitType = (trait.trait_type || 'Unknown').replace(/^\d+\s+/, '');
                 
                 return `
-                    <div class="trait-badge" style="border-color: ${tier.borderColor || 'rgba(255,255,255,0.1)'}">
+                    <div class="trait-badge ${tier.glow}" style="border-color: ${tier.borderColor || 'rgba(255,255,255,0.1)'}">
                         <div class="flex justify-between text-xs items-center">
                             <span class="text-gray-400 uppercase font-semibold text-[10px]">${cleanTraitType}</span>
                             <span class="${tier.color} font-bold">${trait.value || 'Unknown'}</span>
                         </div>
-                        <div class="text-[10px] ${tier.color} mt-0.5 font-bold">
-                            ${traitRarity.toFixed(1)}% rarity
+                        <div class="flex justify-between items-center mt-1">
+                            <div class="text-[9px] ${tier.color} font-bold uppercase">${tier.tier}</div>
+                            <div class="text-[9px] ${tier.color} font-bold">${traitRarity >= 0 ? traitRarity.toFixed(1) + '%' : '—'}</div>
+                        </div>
+                        <div class="w-full h-0.5 bg-white/5 rounded-full mt-1 overflow-hidden">
+                            <div class="h-full rounded-full" style="width: ${traitRarity >= 0 ? Math.min(traitRarity, 100) : 0}%; background: ${tier.borderColor}"></div>
                         </div>
                     </div>
                 `;
@@ -2903,7 +3255,7 @@
                     <div class="mt-3 space-y-1.5">
                         ${nft.attributes.slice(0, 3).map((trait, index) => {
                             const traitRarity = window.calculateTraitRarity(trait, nft.collectionId, totalMinted);
-                            const tier = window.getRarityTier(traitRarity);
+                            const tier = window.getRarityTier(traitRarity, totalMinted);
                             
                             // Clean trait_type: remove leading numbers
                             const cleanTraitType = (trait.trait_type || 'Unknown').replace(/^\d+\s+/, '');
@@ -2914,8 +3266,12 @@
                                         <span class="text-gray-400 uppercase font-semibold text-[10px]">${cleanTraitType}</span>
                                         <span class="${tier.color} font-bold">${trait.value || 'Unknown'}</span>
                                     </div>
-                                    <div class="text-[10px] ${tier.color} mt-0.5 font-bold">
-                                        ${traitRarity.toFixed(1)}% rarity
+                                    <div class="flex justify-between items-center mt-1">
+                                        <div class="text-[9px] ${tier.color} font-bold uppercase">${tier.tier}</div>
+                                        <div class="text-[9px] ${tier.color} font-bold">${traitRarity >= 0 ? traitRarity.toFixed(1) + '%' : '—'}</div>
+                                    </div>
+                                    <div class="w-full h-0.5 bg-white/5 rounded-full mt-1 overflow-hidden">
+                                        <div class="h-full rounded-full" style="width: ${traitRarity >= 0 ? Math.min(traitRarity, 100) : 0}%; background: ${tier.borderColor}"></div>
                                     </div>
                                 </div>
                             `;
@@ -2967,28 +3323,53 @@
             ].filter(Boolean);
             
             let counts = {};
+            let foundId = null;
             for (const id of possibleIds) {
-                if (state.traitCounts[id]) {
+                if (state.traitCounts[id] && Object.keys(state.traitCounts[id]).length > 0) {
                     counts = state.traitCounts[id];
+                    foundId = id;
                     break;
                 }
             }
             
             if (Object.keys(counts).length === 0) {
-                console.warn(`⚠️ No trait counts found for collection: ${collectionId}`);
-                return 0;
+                // Return -1 to signal "no data" — getRarityTier handles this
+                return -1;
             }
             
             const key = `${trait.trait_type}:${trait.value}`;
             const count = counts[key] || 0;
             const rarity = totalMinted > 0 ? (count / totalMinted) * 100 : 0;
             
-            console.log(`🎨 Trait rarity: ${key} = ${rarity.toFixed(1)}% (${count}/${totalMinted})`);
-            
             return rarity;
         };
 
-        window.getRarityTier = (rarityPercent) => {
+        window.getRarityTier = (rarityPercent, totalMinted) => {
+            // No data available — show neutral gray
+            if (rarityPercent < 0) return { tier: 'unknown', color: 'text-gray-500', glow: '', borderColor: 'rgba(107,114,128,0.3)' };
+            
+            // Scale thresholds based on collection size
+            // Small collections (< 20 minted): use wider bands so traits actually get colors
+            // Large collections (100+): use tight thresholds for meaningful rarity
+            
+            if (!totalMinted || totalMinted < 5) {
+                // Very early minting (1-4 NFTs): color by unique vs shared
+                if (rarityPercent >= 100) return { tier: 'unique', color: 'text-cyan-400', glow: 'shadow-[0_0_12px_rgba(34,211,238,0.4)]', borderColor: 'rgba(34,211,238,0.5)' };
+                if (rarityPercent >= 60) return { tier: 'common', color: 'text-green-400', glow: '', borderColor: 'rgba(34,197,94,0.4)' };
+                if (rarityPercent >= 30) return { tier: 'uncommon', color: 'text-blue-400', glow: 'shadow-[0_0_10px_rgba(59,130,246,0.3)]', borderColor: 'rgba(59,130,246,0.5)' };
+                return { tier: 'rare', color: 'text-purple-400', glow: 'shadow-[0_0_15px_rgba(168,85,247,0.5)]', borderColor: 'rgba(168,85,247,0.6)' };
+            }
+            
+            if (totalMinted < 20) {
+                // Small collection (5-19 minted): scaled thresholds
+                if (rarityPercent > 60) return { tier: 'common', color: 'text-gray-400', glow: '', borderColor: 'rgba(156,163,175,0.3)' };
+                if (rarityPercent > 30) return { tier: 'uncommon', color: 'text-green-400', glow: 'shadow-[0_0_10px_rgba(34,197,94,0.3)]', borderColor: 'rgba(34,197,94,0.5)' };
+                if (rarityPercent > 15) return { tier: 'rare', color: 'text-blue-400', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.5)]', borderColor: 'rgba(59,130,246,0.6)' };
+                if (rarityPercent > 5) return { tier: 'elite', color: 'text-purple-400', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.6)]', borderColor: 'rgba(168,85,247,0.7)' };
+                return { tier: 'mythic', color: 'text-yellow-400', glow: 'shadow-[0_0_25px_rgba(234,179,8,0.8)]', borderColor: 'rgba(234,179,8,0.8)' };
+            }
+            
+            // Standard thresholds for larger collections (20+ minted)
             if (rarityPercent > 20) return { tier: 'common', color: 'text-gray-400', glow: '', borderColor: 'rgba(156,163,175,0.3)' };
             if (rarityPercent > 10) return { tier: 'uncommon', color: 'text-green-400', glow: 'shadow-[0_0_10px_rgba(34,197,94,0.3)]', borderColor: 'rgba(34,197,94,0.5)' };
             if (rarityPercent > 3) return { tier: 'rare', color: 'text-blue-400', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.5)]', borderColor: 'rgba(59,130,246,0.6)' };
@@ -3120,7 +3501,20 @@
                                         console.error(`❌ Full error:`, JSON.stringify(updateError, null, 2));
                                     }
                                 } else {
-                                    console.log(`ℹ️ NFT #${item.id} already in database with correct owner, skipping`);
+                                    // Owner is correct - but check if traits are missing and backfill
+                                    if (!existingNFT.attributes || existingNFT.attributes.length === 0) {
+                                        console.log(`🔄 NFT #${item.id} exists but has no traits — backfilling...`);
+                                        try {
+                                            await window.fetchNFTMetadata(existingNFT);
+                                            if (existingNFT.attributes && existingNFT.attributes.length > 0) {
+                                                console.log(`✅ Backfilled ${existingNFT.attributes.length} traits for NFT #${item.id}`);
+                                            }
+                                        } catch (e) {
+                                            console.warn(`⚠️ Could not backfill traits for NFT #${item.id}:`, e.message);
+                                        }
+                                    } else {
+                                        console.log(`ℹ️ NFT #${item.id} already in database with correct owner and ${existingNFT.attributes.length} traits`);
+                                    }
                                 }
                                 continue;
                             }
@@ -3142,20 +3536,6 @@
                                     }
                                 } catch (e) {
                                     console.warn(`⚠️ Could not fetch metadata for NFT #${item.id}:`, e.message);
-                                }
-                            }
-                            
-                            // Try fetching from blockchain if no metadata yet
-                            if (!metadata || !metadata.attributes || metadata.attributes.length === 0) {
-                                try {
-                                    console.log(`📡 Attempting to fetch metadata from blockchain for token: ${item.address}`);
-                                    const accountInfo = await state.keetaClient.accountInfo(item.address);
-                                    if (accountInfo && accountInfo.meta) {
-                                        console.log(`✅ Found blockchain metadata for #${item.id}`);
-                                        metadata = accountInfo.meta;
-                                    }
-                                } catch (e) {
-                                    console.warn(`⚠️ Could not fetch blockchain metadata for NFT #${item.id}:`, e.message);
                                 }
                             }
 
@@ -3239,13 +3619,30 @@
                     console.log(`ℹ️ AUTO-DETECT: No new NFTs found from ${EXTERNAL_COLLECTION.collectionName}`);
                 }
                 
-                // ALWAYS calculate trait counts for this collection (even if just updating owners)
+                // ALWAYS ensure collection record exists + trait counts are up to date
+                await window.createOrUpdateCollectionRecord(EXTERNAL_COLLECTION.collectionToken, EXTERNAL_COLLECTION.collectionName);
+                
+                // Reload collections so PFP collection is in state.collections for lookups
+                await window.loadCollections();
+                
                 const pfpNFTs = state.nfts.filter(n => 
                     n.collectionToken === EXTERNAL_COLLECTION.collectionToken ||
                     n.externalCollection === EXTERNAL_COLLECTION.collectionName
                 );
                 
                 if (pfpNFTs.length > 0) {
+                    // Backfill traits for any PFP NFTs missing attributes
+                    let backfilled = 0;
+                    for (const nft of pfpNFTs) {
+                        if (!nft.attributes || nft.attributes.length === 0) {
+                            try {
+                                await window.fetchNFTMetadata(nft);
+                                if (nft.attributes && nft.attributes.length > 0) backfilled++;
+                            } catch (e) { /* silent */ }
+                        }
+                    }
+                    if (backfilled > 0) console.log(`🔄 Backfilled traits for ${backfilled} PFP NFTs`);
+                    
                     console.log(`📊 Ensuring trait counts for ${pfpNFTs.length} PFP NFTs...`);
                     await window.calculateAndSaveTraitCounts(EXTERNAL_COLLECTION.collectionToken);
                     await window.loadTraitCounts();
@@ -4472,7 +4869,7 @@
                 const traitCountsRef = doc(db, 'traitCounts', collectionId);
                 const countSnap = await getDoc(traitCountsRef);
                 
-                let counts = countSnap.exists() ? countSnap.data() : {};
+                let counts = countSnap.exists() ? (countSnap.data().counts || countSnap.data()) : {};
                 
                 traits.forEach(trait => {
                     const key = `${trait.trait_type}:${trait.value}`;
@@ -4480,7 +4877,11 @@
                 });
                 
                 await setDoc(traitCountsRef, counts);
-                console.log("✅ Trait counts updated");
+                
+                // ⚡ CRITICAL: Also update in-memory state so trait colors show immediately
+                state.traitCounts[collectionId] = counts;
+                
+                console.log(`✅ Trait counts updated for ${collectionId}: ${Object.keys(counts).length} traits in memory + Firebase`);
             } catch (error) {
                 console.error("Error updating trait counts:", error);
             }
@@ -4960,6 +5361,7 @@
                 if (result.success) {
                     console.log("✅ Mint pipeline succeeded:", result);
                     window.showMintStatus('confirmed', '✅ Mint Confirmed!');
+                    window.mintTracker.complete(true);
                     
                     // Single success notification
                     window.notify("✅ NFT minted successfully!", "success");
@@ -4987,6 +5389,7 @@
                     // Only show failure if result.success is false
                     console.error("❌ Mint pipeline failed:", result.error);
                     window.showMintStatus('failed', result.error || 'Mint failed');
+                    window.mintTracker.complete(false, result.error || 'Mint failed');
                     window.notify(`❌ Mint failed: ${result.error}`, "error");
                 }
                 
@@ -4995,6 +5398,7 @@
             } catch (error) {
                 console.error("❌ Mint exception:", error);
                 window.showMintStatus('failed', 'Unexpected error');
+                window.mintTracker.complete(false, error.message || 'Unexpected error');
                 window.notify(`❌ Mint failed: ${error.message}`, "error");
                 return { success: false, error: error.message };
             } finally {
@@ -5027,6 +5431,9 @@
                 const progressMsg = `🎲 Minting ${quantity} NFT${quantity > 1 ? 's' : ''}...`;
                 window.notify(progressMsg, "success");
                 console.log(`⚡ Starting ${quantity} mints with OPTIMISTIC UI...`);
+                
+                // Show mint status tracker
+                window.mintTracker.show();
                 
                 let successCount = 0;
                 let failedCount = 0;
@@ -6785,12 +7192,8 @@
                 return;
             }
             
-            // FIX #1: Fetch metadata for missing traits
-            for (const nft of my) {
-                if (!nft.attributes || nft.attributes.length === 0) {
-                    await window.fetchNFTMetadata(nft);
-                }
-            }
+            // Render immediately with current data
+            const nftsNeedingTraits = my.filter(n => !n.attributes || n.attributes.length === 0);
             
             grid.innerHTML = my.map(n => {
                 const isListed = n.isListed || false;
@@ -6924,6 +7327,14 @@
                 </div>
                 `;
             }).join('');
+            
+            // Background: fetch missing traits and re-render vault when ready
+            if (nftsNeedingTraits.length > 0) {
+                Promise.all(nftsNeedingTraits.map(nft => window.fetchNFTMetadata(nft))).then(() => {
+                    const anyUpdated = nftsNeedingTraits.some(n => n.attributes && n.attributes.length > 0);
+                    if (anyUpdated) window.renderCollection();
+                });
+            }
         };
 
         
@@ -7006,7 +7417,7 @@
             }
         };
 
-        window.viewCollection = (colToken) => {
+        window.viewCollection = async (colToken) => {
             // Track where user came from for back button
             state._collectionViewSource = state.currentTab || 'market';
             state.viewingCollection = colToken;
@@ -7063,9 +7474,25 @@
             if (!base) return;
             
             const listedNfts = colNfts.filter(n => n.isListed);
-            const ktaListings = listedNfts.filter(n => n.listedCurrency === 'KTA');
+            const ktaListings = listedNfts.filter(n => !n.listedCurrency || n.listedCurrency === 'KTA');
+            const punksListings = listedNfts.filter(n => n.listedCurrency === 'PUNKS');
             const floorKTA = ktaListings.length > 0 ? Math.min(...ktaListings.map(n => n.listedPrice)) : null;
-            const floorDisplay = floorKTA ? `${floorKTA} KTA` : '—';
+            const floorPUNKS = punksListings.length > 0 ? Math.min(...punksListings.map(n => n.listedPrice)) : null;
+            
+            // Build floor display - show listed floors, or fall back to mint price
+            let floorParts = [];
+            if (floorKTA) floorParts.push(`${floorKTA} KTA`);
+            if (floorPUNKS) floorParts.push(`${floorPUNKS} PUNKS`);
+            if (floorParts.length === 0) {
+                // No listings — show mint price if available from collection metadata
+                const colMetaForFloor = state.collections.find(c => 
+                    c.collectionId === state.viewingCollection || 
+                    (base.collectionToken && getNormalizedId(c.collectionToken) === getNormalizedId(base.collectionToken))
+                );
+                if (colMetaForFloor?.priceKTA > 0) floorParts.push(`${colMetaForFloor.priceKTA} KTA (mint)`);
+                else if (colMetaForFloor?.pricePunks > 0) floorParts.push(`${colMetaForFloor.pricePunks} PUNKS (mint)`);
+            }
+            const floorDisplay = floorParts.length > 0 ? floorParts.join(' / ') : '—';
             
             const collectionTitle = base.collection || base.collectionTitle || base.collectionName || "Protocol Node";
             const verifiedBadge = base.verified ? '<span class="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full border-2 border-white/20 shadow-lg ml-3" title="Verified Collection"><svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></span>' : '';
@@ -7102,6 +7529,7 @@
             }
             document.getElementById('colPageImage').innerHTML = `<img src="${headerThumb}" class="sharp-img w-full h-full object-cover shadow-2xl border border-white/10">`;
             
+            // Render immediately with whatever traits we have
             const gridHTML = colNfts.map(n => {
                 if (!n.collectionId) n.collectionId = state.viewingCollection;
                 let rarestPercent = 100;
@@ -7109,11 +7537,11 @@
                 if (n.attributes && n.attributes.length > 0 && collectionData) {
                     n.attributes.forEach(trait => {
                         const rarity = window.calculateTraitRarity(trait, n.collectionId, collectionData.mintedCount);
-                        if (rarity < rarestPercent) rarestPercent = rarity;
+                        if (rarity >= 0 && rarity < rarestPercent) rarestPercent = rarity;
                     });
                 }
                 
-                const rarityTier = window.getRarityTier(rarestPercent);
+                const rarityTier = window.getRarityTier(rarestPercent, collectionData.mintedCount);
                 
                 // Use toggle mode for marketplace cards too
                 const traitsHTML = window.renderNFTTraits(n, 'toggle', false);
@@ -7147,6 +7575,17 @@
             
             console.log(`📐 viewCollection: Rendering ${colNfts.length} NFT cards to colPageGrid`);
             document.getElementById('colPageGrid').innerHTML = gridHTML;
+            
+            // Background: fetch missing traits and re-render when they arrive
+            const nftsMissingTraits = colNfts.filter(n => !n.attributes || n.attributes.length === 0);
+            if (nftsMissingTraits.length > 0) {
+                Promise.all(nftsMissingTraits.map(nft => window.fetchNFTMetadata(nft))).then(() => {
+                    const anyUpdated = nftsMissingTraits.some(n => n.attributes && n.attributes.length > 0);
+                    if (anyUpdated && typeof window.renderFilteredCollection === 'function') {
+                        window.renderFilteredCollection();
+                    }
+                });
+            }
             
             // Post-render: proactively load IPFS images in collection page
             setTimeout(() => {
@@ -7345,17 +7784,18 @@
             
             const filteredGridHTML = colNfts.map(n => {
                 let rarestPercent = 100;
-                if (n.attributes && n.attributes.length > 0 && n.collectionId) {
-                    const collectionData = state.collections.find(c => c.collectionId === n.collectionId);
-                    if (collectionData) {
-                        n.attributes.forEach(trait => {
-                            const rarity = window.calculateTraitRarity(trait, n.collectionId, collectionData.mintedCount);
-                            if (rarity < rarestPercent) rarestPercent = rarity;
-                        });
-                    }
+                const collectionData = state.collections.find(c => 
+                    c.collectionId === n.collectionId || 
+                    (n.collectionToken && getNormalizedId(c.collectionToken) === getNormalizedId(n.collectionToken))
+                );
+                if (n.attributes && n.attributes.length > 0 && collectionData) {
+                    n.attributes.forEach(trait => {
+                        const rarity = window.calculateTraitRarity(trait, n.collectionId, collectionData?.mintedCount || 1);
+                        if (rarity >= 0 && rarity < rarestPercent) rarestPercent = rarity;
+                    });
                 }
                 
-                const rarityTier = window.getRarityTier(rarestPercent);
+                const rarityTier = window.getRarityTier(rarestPercent, collectionData?.mintedCount || 1);
                 const traitsHTML = window.renderNFTTraits(n, 'toggle', false);
                 
                 const isListed = n.isListed || false;
@@ -7427,8 +7867,6 @@
             const nft = state.nfts.find(n => n.id === nftId);
             if (!nft) return window.notify("NFT not found", "error");
             
-            if (!nft.attributes || nft.attributes.length === 0) await window.fetchNFTMetadata(nft);
-            
             state.listingNFT = nft;
             
             const listingImgPath = window.getNFTImagePath(nft);
@@ -7451,7 +7889,6 @@
             
             const traitsEl = document.getElementById('listingNFTTraits');
             if (traitsEl) {
-                // Show all traits expanded in listing modal
                 traitsEl.innerHTML = window.renderNFTTraits(nft, 'all');
             }
             
@@ -7459,7 +7896,17 @@
             document.querySelector('input[name="listingCurrency"][value="KTA"]').checked = true;
             window.updateFeeBreakdown();
             
+            // Show modal IMMEDIATELY - no waiting for metadata
             document.getElementById('listingModal').classList.remove('hidden');
+            
+            // Fetch traits in background if missing, then update UI
+            if (!nft.attributes || nft.attributes.length === 0) {
+                window.fetchNFTMetadata(nft).then(() => {
+                    if (traitsEl && nft.attributes && nft.attributes.length > 0) {
+                        traitsEl.innerHTML = window.renderNFTTraits(nft, 'all');
+                    }
+                });
+            }
         };
 
         window.closeListingModal = () => {
@@ -7623,8 +8070,15 @@
             const nft = state.nfts.find(n => n.id === nftId);
             if (!nft) return;
             
-            // Open the listing modal with current values pre-filled
-            if (!nft.attributes || nft.attributes.length === 0) await window.fetchNFTMetadata(nft);
+            // Fetch traits in background if missing (don't block modal)
+            if (!nft.attributes || nft.attributes.length === 0) {
+                window.fetchNFTMetadata(nft).then(() => {
+                    const traitsEl = document.getElementById('listingNFTTraits');
+                    if (traitsEl && nft.attributes && nft.attributes.length > 0) {
+                        traitsEl.innerHTML = window.renderNFTTraits(nft, 'all');
+                    }
+                });
+            }
             
             state.listingNFT = nft;
             
@@ -8777,14 +9231,42 @@
             if (!window.acquireTxLock(`buy_${nftId}`)) return window.notify("Purchase already in progress...", "warning");
             
             try {
-                // Step 1: Fetch NFT data
-                const snap = await getDoc(doc(db, 'nfts', nftId));
-                if (!snap.exists()) return window.notify("NFT not found", "error");
+                // Step 1: ATOMIC lock - read NFT and mark as pending in one transaction
+                // This prevents two buyers from purchasing the same NFT
+                const nftRef = doc(db, 'nfts', nftId);
+                let nft;
                 
-                const nft = snap.data();
+                try {
+                    nft = await runTransaction(db, async (transaction) => {
+                        const snap = await transaction.get(nftRef);
+                        if (!snap.exists()) throw new Error('NFT_NOT_FOUND');
+                        
+                        const data = snap.data();
+                        
+                        // Check if still available
+                        if (!data.isListed && !isBlind) throw new Error('NFT_ALREADY_SOLD');
+                        if (data.status === 'pending_purchase') throw new Error('NFT_BEING_PURCHASED');
+                        
+                        // Atomically mark as pending (blocks other buyers)
+                        transaction.update(nftRef, {
+                            status: 'pending_purchase',
+                            _pendingBuyer: state.address,
+                            _pendingAt: new Date().toISOString()
+                        });
+                        
+                        return data;
+                    });
+                } catch (lockErr) {
+                    if (lockErr.message === 'NFT_NOT_FOUND') return window.notify("NFT not found", "error");
+                    if (lockErr.message === 'NFT_ALREADY_SOLD') return window.notify("This NFT has already been sold", "error");
+                    if (lockErr.message === 'NFT_BEING_PURCHASED') return window.notify("Another buyer is completing this purchase", "warning");
+                    throw lockErr;
+                }
                 
                 // FIX: Prevent buying your own NFT
                 if (nft.owner && nft.owner.toLowerCase() === state.address.toLowerCase()) {
+                    // Release the lock
+                    await updateDoc(nftRef, { status: 'listed', _pendingBuyer: null, _pendingAt: null });
                     return window.notify("❌ Cannot buy your own NFT", "error");
                 }
                 
@@ -8793,14 +9275,17 @@
                 const currency = nft.listedCurrency || 'KTA';
                 
                 if (price <= 0) {
+                    await updateDoc(nftRef, { status: 'listed', _pendingBuyer: null, _pendingAt: null });
                     return window.notify("Invalid price", "error");
                 }
                 
                 // Check balance
                 if (currency === 'KTA' && state.balanceKTA < price) {
+                    await updateDoc(nftRef, { status: 'listed', _pendingBuyer: null, _pendingAt: null });
                     return window.notify(`Insufficient balance. Need ${price} KTA`, "error");
                 }
                 if (currency === 'PUNKS' && state.balancePunks < price) {
+                    await updateDoc(nftRef, { status: 'listed', _pendingBuyer: null, _pendingAt: null });
                     return window.notify(`Insufficient balance. Need ${price} PUNKS`, "error");
                 }
                 
@@ -9070,6 +9555,19 @@
             } catch (e) {
                 console.error("Purchase error:", e);
                 window.notify(`❌ Purchase failed: ${e.message}`, "error");
+                
+                // Release the Firestore pending_purchase lock so others can buy
+                try {
+                    const nftRef = doc(db, 'nfts', nftId);
+                    await updateDoc(nftRef, { 
+                        status: 'listed', 
+                        _pendingBuyer: null, 
+                        _pendingAt: null 
+                    });
+                    console.log("🔓 Released pending_purchase lock after failure");
+                } catch (releaseErr) {
+                    console.error("⚠️ Failed to release purchase lock:", releaseErr);
+                }
             } finally {
                 window.releaseTxLock(`buy_${nftId}`);
             }
@@ -10770,18 +11268,43 @@ These will be minted to your wallet for:
         
         // Update transaction stats
         window.updateTransactionStats = () => {
+            const currencyFilter = state.txCurrency || 'ALL';
             const totalCount = state.transactions.length;
             const sales = state.transactions.filter(tx => tx.type === 'sale');
-            const purchases = state.transactions.filter(tx => tx.type === 'purchase' || tx.type === 'mint'); // Include mints!
+            const purchases = state.transactions.filter(tx => tx.type === 'purchase' || tx.type === 'mint');
             const mints = state.transactions.filter(tx => tx.type === 'mint');
             
-            const totalSales = sales.reduce((sum, tx) => sum + (tx.price || 0), 0);
-            const totalPurchases = purchases.reduce((sum, tx) => sum + (tx.price || 0), 0); // Now includes mint prices!
+            // Separate by currency
+            const salesKTA = sales.filter(tx => !tx.currency || tx.currency === 'KTA').reduce((s, tx) => s + (tx.price || 0), 0);
+            const salesPUNKS = sales.filter(tx => tx.currency === 'PUNKS').reduce((s, tx) => s + (tx.price || 0), 0);
+            const purchasesKTA = purchases.filter(tx => !tx.currency || tx.currency === 'KTA').reduce((s, tx) => s + (tx.price || 0), 0);
+            const purchasesPUNKS = purchases.filter(tx => tx.currency === 'PUNKS').reduce((s, tx) => s + (tx.price || 0), 0);
             
             document.getElementById('txTotalCount').innerText = totalCount;
-            document.getElementById('txTotalSales').innerText = `${totalSales.toFixed(2)} KTA`;
-            document.getElementById('txTotalPurchases').innerText = `${totalPurchases.toFixed(2)} KTA`;
             document.getElementById('txTotalMints').innerText = mints.length;
+            
+            const salesEl = document.getElementById('txTotalSales');
+            const salesSub = document.getElementById('txTotalSalesSub');
+            const purchEl = document.getElementById('txTotalPurchases');
+            const purchSub = document.getElementById('txTotalPurchasesSub');
+            
+            if (currencyFilter === 'KTA') {
+                salesEl.innerText = `${salesKTA.toFixed(2)} KTA`;
+                salesSub.innerText = '';
+                purchEl.innerText = `${purchasesKTA.toFixed(2)} KTA`;
+                purchSub.innerText = '';
+            } else if (currencyFilter === 'PUNKS') {
+                salesEl.innerText = `${salesPUNKS.toFixed(2)} PUNKS`;
+                salesSub.innerText = '';
+                purchEl.innerText = `${purchasesPUNKS.toFixed(2)} PUNKS`;
+                purchSub.innerText = '';
+            } else {
+                // ALL - show both
+                salesEl.innerText = `${salesKTA.toFixed(2)} KTA`;
+                salesSub.innerText = salesPUNKS > 0 ? `+ ${salesPUNKS.toFixed(2)} PUNKS` : '';
+                purchEl.innerText = `${purchasesKTA.toFixed(2)} KTA`;
+                purchSub.innerText = purchasesPUNKS > 0 ? `+ ${purchasesPUNKS.toFixed(2)} PUNKS` : '';
+            }
             
             // Last Recorded display
             const lastEl = document.getElementById('txLastRecorded');
@@ -10798,12 +11321,37 @@ These will be minted to your wallet for:
         };
         
         // Filter transactions
+        // Transaction history currency toggle
+        window.setTxCurrency = (currency) => {
+            state.txCurrency = currency; // 'ALL', 'KTA', or 'PUNKS'
+            ['ALL', 'KTA', 'PUNKS'].forEach(c => {
+                const btn = document.getElementById(`txCurrency${c}`);
+                if (btn) {
+                    if (c === currency) {
+                        btn.className = 'px-3 py-2 text-[10px] orbitron font-black transition-all ' +
+                            (c === 'KTA' ? 'bg-cyan-500/30 text-cyan-400 border-r border-white/10' :
+                             c === 'PUNKS' ? 'bg-fuchsia-500/30 text-fuchsia-400' :
+                             'bg-orange-500/30 text-orange-400 border-r border-white/10');
+                    } else {
+                        btn.className = 'px-3 py-2 text-[10px] orbitron font-black bg-black/20 text-gray-500 transition-all hover:text-white' +
+                            (c !== 'PUNKS' ? ' border-r border-white/10' : '');
+                    }
+                }
+            });
+            window.filterTransactions();
+        };
+        
         window.filterTransactions = () => {
             const typeFilter = document.getElementById('txTypeFilter')?.value || 'all';
             const dateFilter = document.getElementById('txDateFilter')?.value || 'all';
             const searchInput = document.getElementById('txSearchInput')?.value.toLowerCase() || '';
+            const currencyFilter = state.txCurrency || 'ALL';
             
             state.transactions = state.allTransactions.filter(tx => {
+                // Currency filter
+                if (currencyFilter === 'KTA' && tx.currency && tx.currency !== 'KTA') return false;
+                if (currencyFilter === 'PUNKS' && tx.currency !== 'PUNKS') return false;
+                
                 // Type filter
                 if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
                 
@@ -11327,26 +11875,59 @@ These will be minted to your wallet for:
         window.resetWipe = () => { document.getElementById('wipeStage1')?.classList.remove('hidden'); document.getElementById('wipeStage2')?.classList.add('hidden'); };
 
         window.clearAllNFTs = async () => {
-            if (!confirm("WARNING: Delete ALL NFTs, Collections, Traits? Continue?")) return;
+            if (!confirm("WARNING: Delete ALL marketplace NFTs, Collections, Traits? (PFP collection will be PRESERVED) Continue?")) return;
             try {
+                const PFP_TOKEN = EXTERNAL_COLLECTION.collectionToken;
+                let deleted = 0, preserved = 0;
+                
+                // NFTs - skip PFP
                 const nftsRef = collection(db, 'nfts');
                 const nftsSnap = await getDocs(nftsRef);
-                for (const document of nftsSnap.docs) await deleteDoc(document.ref);
+                for (const document of nftsSnap.docs) {
+                    const data = document.data();
+                    if (data.isExternal || data.collectionToken === PFP_TOKEN || document.id.startsWith('external_')) {
+                        preserved++;
+                        continue;
+                    }
+                    await deleteDoc(document.ref);
+                    deleted++;
+                }
                 
+                // Collections - skip PFP
                 const colRef = collection(db, 'collections');
                 const colSnap = await getDocs(colRef);
-                for (const document of colSnap.docs) await deleteDoc(document.ref);
+                for (const document of colSnap.docs) {
+                    const data = document.data();
+                    if (data.isExternal || data.collectionToken === PFP_TOKEN) {
+                        preserved++;
+                        continue;
+                    }
+                    await deleteDoc(document.ref);
+                    deleted++;
+                }
                 
+                // Trait counts - skip PFP (keep trait data for PFP collection)
                 const traitRef = collection(db, 'traitCounts');
                 const traitSnap = await getDocs(traitRef);
-                for (const document of traitSnap.docs) await deleteDoc(document.ref);
+                for (const document of traitSnap.docs) {
+                    if (document.id === PFP_TOKEN || document.id.includes(PFP_TOKEN)) {
+                        preserved++;
+                        continue;
+                    }
+                    await deleteDoc(document.ref);
+                    deleted++;
+                }
                 
+                // Wallet mint tracking - wipe all (marketplace only)
                 const trackRef = collection(db, 'walletMintTracking');
                 const trackSnap = await getDocs(trackRef);
-                for (const document of trackSnap.docs) await deleteDoc(document.ref);
+                for (const document of trackSnap.docs) {
+                    await deleteDoc(document.ref);
+                    deleted++;
+                }
                 
-                const total = nftsSnap.docs.length + colSnap.docs.length + traitSnap.docs.length + trackSnap.docs.length;
-                window.notify(`Purged ${total} records`, "success");
+                window.notify(`Purged ${deleted} records (preserved ${preserved} PFP records)`, "success");
+                console.log(`🛡️ Preserved ${preserved} PFP records, deleted ${deleted} marketplace records`);
                 
                 await window.loadNFTsFromFirebase();
                 await window.loadCollections();
@@ -12528,22 +13109,32 @@ These will be minted to your wallet for:
             async getAndIncrementMintIndex(collectionId) {
                 const collectionRef = doc(this.db, 'collections', collectionId);
                 
-                // Get current state
-                const beforeSnap = await getDoc(collectionRef);
-                const beforeCount = beforeSnap.data().mintedCount || 0;
-                console.log(`📈 BEFORE increment: mintedCount=${beforeCount}, remainingSupply=${beforeSnap.data().remainingSupply}`);
+                // ⚡ ATOMIC: Use Firestore runTransaction to prevent duplicate mint indexes
+                // Without this, two concurrent mints could get the SAME index
+                const mintIndex = await runTransaction(db, async (transaction) => {
+                    const snap = await transaction.get(collectionRef);
+                    if (!snap.exists()) throw new Error('Collection not found');
+                    
+                    const data = snap.data();
+                    const currentCount = data.mintedCount || 0;
+                    const remaining = data.remainingSupply ?? (data.totalSupply - currentCount);
+                    
+                    if (remaining <= 0) {
+                        throw new Error('SOLD OUT: No supply remaining');
+                    }
+                    
+                    console.log(`📈 ATOMIC mint index: mintedCount=${currentCount}, remaining=${remaining}`);
+                    
+                    // Atomically reserve this index - Firestore retries on conflict
+                    transaction.update(collectionRef, {
+                        mintedCount: currentCount + 1,
+                        remainingSupply: remaining - 1
+                    });
+                    
+                    return currentCount; // This user's guaranteed unique index
+                });
                 
-                // Increment
-                await updateDoc(collectionRef, { mintedCount: increment(1), remainingSupply: increment(-1) });
-                
-                // Get new state
-                const afterSnap = await getDoc(collectionRef);
-                const afterCount = afterSnap.data().mintedCount || 0;
-                console.log(`📈 AFTER increment: mintedCount=${afterCount}, remainingSupply=${afterSnap.data().remainingSupply}`);
-                
-                const mintIndex = afterCount - 1;
-                console.log(`🎯 Mint will use index: ${mintIndex}`);
-                
+                console.log(`🎯 Mint will use index: ${mintIndex} (atomically reserved)`);
                 return mintIndex;
             }
 
@@ -12578,6 +13169,7 @@ These will be minted to your wallet for:
 
             async validateMintRequest(req) {
                 console.log("🔍 [STEP 1] Validating mint request...");
+                window.mintTracker.setStep(1, 'active', 'Checking balance & supply');
                 console.log("📋 Request details:", {
                     collectionId: req.collectionId,
                     userWallet: req.userWallet,
@@ -12674,6 +13266,7 @@ These will be minted to your wallet for:
 
                 console.log(`✅ Balance sufficient: ${balance} >= ${price}`);
                 console.log("✅ [STEP 1] ALL VALIDATION CHECKS PASSED");
+                window.mintTracker.setStep(1, 'done', 'Validated ✓');
                 console.log("📋 Validation summary:", {
                     collection: collection.collectionTitle,
                     supply: `${collection.mintedCount}/${collection.totalSupply}`,
@@ -12687,6 +13280,7 @@ These will be minted to your wallet for:
 
             async resolveMetadata(collectionId) {
                 console.log("📄 [STEP 2] Resolving metadata...");
+                window.mintTracker.setStep(2, 'active', 'Fetching from IPFS...');
                 
                 // ⚡ OPTIMIZATION: Fetch collection and increment index in PARALLEL
                 const [collection, mintIndex] = await Promise.all([
@@ -12769,11 +13363,13 @@ These will be minted to your wallet for:
                 if (imagePath.startsWith('ipfs://')) imagePath = imagePath.replace('ipfs://', '');
                 else if (!imagePath.startsWith('http')) imagePath = `${collection.ipfsCid}/${imagePath}`;
                 console.log("✅ [STEP 2] Metadata resolved:", metadata.name);
+                window.mintTracker.setStep(2, 'done', metadata.name);
                 return { metadata, imagePath, mintIndex };
             }
 
             async createNFTToken(req, metadata, collection) {
                 console.log("🎨 [STEP 3] Creating NFT token with TWO-TRANSACTION pattern...");
+                window.mintTracker.setStep(3, 'active', 'Writing to blockchain...');
                 console.log("   NFT Name:", metadata.name);
                 console.log("   Collection:", collection.collectionTitle);
                 const account = req.userClient?.account || req.userAccount;
@@ -12891,11 +13487,13 @@ These will be minted to your wallet for:
                 }
                 
                 console.log("✅ [STEP 3] NFT token created with TWO-TRANSACTION pattern:", tokenId);
+                window.mintTracker.setStep(3, 'done', 'Token created on-chain');
                 return tokenId;
             }
 
             async executePayment(req, collection) {
                 console.log("💰 [STEP 4] Processing payment...");
+                window.mintTracker.setStep(4, 'active', 'Sending payment...');
                 
                 // Get price using unified helper (supports KTA + PUNKS)
                 const cp = window.getCollectionPrice(collection, req.userWallet);
@@ -12914,6 +13512,7 @@ These will be minted to your wallet for:
                 // Handle FREE mints - skip payment
                 if (price === 0) {
                     console.log(`✅ [STEP 4] FREE MINT - No payment required`);
+                    window.mintTracker.setStep(4, 'done', 'Free mint — no payment');
                     return 'free_mint_no_payment';
                 }
                 
@@ -12942,11 +13541,13 @@ These will be minted to your wallet for:
                 const txHash = paymentTx?.voteStaple?.blocks?.[0]?.$hash || this.extractHashFromTx(paymentTx);
                 
                 console.log("✅ [STEP 4] Payment complete, tx:", txHash);
+                window.mintTracker.setStep(4, 'done', 'Payment confirmed');
                 return txHash;
             }
 
             async commitToFirebase(req, tokenId, metadata, imagePath, txHash, mintIndex, collection) {
                 console.log("💾 [STEP 5] Committing to Firebase...");
+                window.mintTracker.setStep(5, 'active', 'Saving to database...');
                 console.log("TX Hash being saved:", txHash || "(none)");
                 if (!txHash) {
                     console.warn("⚠️ WARNING: Committing NFT without transaction hash");
@@ -13100,6 +13701,7 @@ These will be minted to your wallet for:
                 }, 2000);
                 
                 console.log("✅ [STEP 5] Firebase commit complete");
+                window.mintTracker.setStep(5, 'done', 'Saved ✓');
                 
                 // DISABLED: Auto-escrow for blind mints
                 // NFTs now stay with the user after minting
@@ -13208,6 +13810,18 @@ These will be minted to your wallet for:
                     
                 } catch (error) {
                     console.error("❌ Mint pipeline failed:", error);
+                    
+                    // Show error on the current active step
+                    for (let s = 5; s >= 1; s--) {
+                        const stepEl = document.getElementById(`mintStep${s}`);
+                        if (stepEl && stepEl.classList.contains('opacity-100')) {
+                            const icon = document.getElementById(`mintStep${s}Icon`);
+                            if (icon && icon.innerHTML !== '✓') {
+                                window.mintTracker.setStep(s, 'error', error.message?.substring(0, 40) || 'Failed');
+                                break;
+                            }
+                        }
+                    }
                     
                     // CRITICAL: Rollback mint index if we got past metadata resolution
                     if (mintIndex !== null && collectionRef) {
@@ -13910,12 +14524,16 @@ Click Cancel to abort.`);
                 // Collections to wipe
                 const WIPE_COLLECTIONS = ['nfts', 'transactions', 'offers', 'bids', 'auctions', 'comments'];
                 
+                // PFP collection token - NEVER delete these
+                const PFP_COLLECTION_TOKEN = EXTERNAL_COLLECTION.collectionToken;
+                
                 const stats = {
                     totalDeleted: 0,
+                    pfpPreserved: 0,
                     byCollection: {}
                 };
                 
-                // Step 1: Delete all documents from wipe collections
+                // Step 1: Delete all documents from wipe collections (PRESERVING PFP)
                 for (const collectionName of WIPE_COLLECTIONS) {
                     try {
                         console.log(`📦 Processing collection: ${collectionName}`);
@@ -13930,24 +14548,35 @@ Click Cancel to abort.`);
                             continue;
                         }
                         
-                        console.log(`   🗑️  Found ${snapshot.size} documents to delete...`);
+                        console.log(`   🗑️  Found ${snapshot.size} documents to process...`);
                         
-                        // Delete all documents
+                        // Delete documents, but SKIP PFP NFTs
                         let deleted = 0;
+                        let skipped = 0;
                         for (const docSnapshot of snapshot.docs) {
                             try {
+                                const data = docSnapshot.data();
+                                
+                                // PROTECT PFP: Skip external/PFP NFTs
+                                if (collectionName === 'nfts' && (data.isExternal || data.collectionToken === PFP_COLLECTION_TOKEN || docSnapshot.id.startsWith('external_'))) {
+                                    skipped++;
+                                    stats.pfpPreserved++;
+                                    continue;
+                                }
+                                
                                 await deleteDoc(doc(db, collectionName, docSnapshot.id));
                                 deleted++;
                                 
                                 // Progress indicator every 10 deletions
                                 if (deleted % 10 === 0) {
-                                    console.log(`   ⏳ Deleted ${deleted}/${snapshot.size}...`);
+                                    console.log(`   ⏳ Deleted ${deleted}/${snapshot.size - skipped}...`);
                                 }
                             } catch (error) {
                                 console.error(`   ⚠️  Failed to delete document ${docSnapshot.id}:`, error.message);
                             }
                         }
                         
+                        if (skipped > 0) console.log(`   🛡️ PRESERVED ${skipped} PFP NFTs`);
                         stats.byCollection[collectionName] = deleted;
                         stats.totalDeleted += deleted;
                         console.log(`   ✅ Deleted ${deleted} documents from ${collectionName}\n`);
@@ -13970,6 +14599,12 @@ Click Cancel to abort.`);
                     for (const collectionDoc of collectionsSnapshot.docs) {
                         const data = collectionDoc.data();
                         const totalSupply = data.totalSupply || 0;
+                        
+                        // PROTECT PFP: Skip external/PFP collection
+                        if (data.isExternal || data.collectionToken === PFP_COLLECTION_TOKEN) {
+                            console.log(`   🛡️ PRESERVED PFP collection: ${data.collectionTitle || collectionDoc.id}`);
+                            continue;
+                        }
                         
                         try {
                             await updateDoc(doc(db, 'collections', collectionDoc.id), {
@@ -13998,6 +14633,7 @@ Click Cancel to abort.`);
 ║ 📊 DATABASE WIPE COMPLETE!
 ╠════════════════════════════════════════════════════════════════════
 ║ Total Documents Deleted: ${stats.totalDeleted}
+║ PFP NFTs Preserved: ${stats.pfpPreserved}
 ╠════════════════════════════════════════════════════════════════════
 ║ Breakdown by Collection:
 ╠════════════════════════════════════════════════════════════════════`);
@@ -14063,6 +14699,10 @@ Click Cancel to do it manually later.`);
             try {
                 window.notify("🗑️ Starting database wipe...", "success");
                 console.log("🗑️ DATABASE WIPE INITIATED");
+                console.log("🛡️ PFP collection will be PRESERVED");
+                
+                // PFP collection token - NEVER delete these
+                const PFP_TOKEN = EXTERNAL_COLLECTION.collectionToken;
                 
                 const collections = [
                     { name: 'nfts', label: 'NFTs' },
@@ -14071,12 +14711,13 @@ Click Cancel to do it manually later.`);
                     { name: 'offers', label: 'Offers' },
                     { name: 'whitelistWallets', label: 'Whitelist Wallets' },
                     { name: 'whitelistSettings', label: 'Whitelist Settings' },
-                    { name: 'traitCounts', label: 'Trait Counts' },
                     { name: 'walletMintTracking', label: 'Wallet Tracking' },
                     { name: 'walletStats', label: 'Wallet Stats' }
                 ];
+                // NOTE: traitCounts removed from wipe list to preserve PFP trait data
                 
                 let totalDeleted = 0;
+                let pfpPreserved = 0;
                 
                 for (const col of collections) {
                     try {
@@ -14091,17 +14732,35 @@ Click Cancel to do it manually later.`);
                         
                         console.log(`  📊 ${col.label}: Found ${snapshot.size} documents`);
                         
-                        // Delete all documents in batches
+                        // Delete documents, PRESERVING PFP data
                         const deletePromises = [];
+                        let skipped = 0;
                         snapshot.forEach((docSnap) => {
+                            const data = docSnap.data();
+                            
+                            // PROTECT PFP NFTs
+                            if (col.name === 'nfts' && (data.isExternal || data.collectionToken === PFP_TOKEN || docSnap.id.startsWith('external_'))) {
+                                skipped++;
+                                pfpPreserved++;
+                                return;
+                            }
+                            
+                            // PROTECT PFP collection definition
+                            if (col.name === 'collections' && (data.isExternal || data.collectionToken === PFP_TOKEN)) {
+                                skipped++;
+                                pfpPreserved++;
+                                return;
+                            }
+                            
                             deletePromises.push(deleteDoc(doc(db, col.name, docSnap.id)));
                         });
                         
                         await Promise.all(deletePromises);
-                        totalDeleted += snapshot.size;
+                        totalDeleted += deletePromises.length;
                         
-                        console.log(`  ✅ ${col.label}: Deleted ${snapshot.size} documents`);
-                        window.notify(`✅ Deleted ${snapshot.size} ${col.label}`, "success");
+                        if (skipped > 0) console.log(`  🛡️ PRESERVED ${skipped} PFP records`);
+                        console.log(`  ✅ ${col.label}: Deleted ${deletePromises.length} documents`);
+                        window.notify(`✅ Deleted ${deletePromises.length} ${col.label}`, "success");
                         
                     } catch (error) {
                         console.error(`  ❌ ${col.label}: Error -`, error);
@@ -15402,6 +16061,76 @@ Click Cancel to do it manually later.`);
             <button id="confirmModalCancel" class="w-full py-4 rounded-xl bg-gray-700/30 border border-gray-600/30 text-gray-300 hover:bg-gray-700/50 orbitron font-bold text-sm transition-all">
                 Cancel
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- MINT STATUS TRACKER - Bottom popup showing real-time mint progress -->
+<div id="mintTracker" class="fixed bottom-4 right-4 z-[9999] hidden" style="width: 340px;">
+    <div class="bg-gray-900/95 backdrop-blur-xl border border-cyan-500/30 rounded-xl shadow-2xl shadow-cyan-500/10 overflow-hidden">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-4 py-2.5 bg-cyan-500/10 border-b border-cyan-500/20">
+            <div class="flex items-center gap-2">
+                <div id="mintTrackerSpinner" class="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                <span class="orbitron text-[10px] text-cyan-400 font-black uppercase tracking-wider">Minting</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="mintTrackerTimer" class="fira text-[10px] text-gray-400">0s</span>
+                <button onclick="document.getElementById('mintTracker').classList.add('hidden')" class="text-gray-500 hover:text-white text-sm leading-none">&times;</button>
+            </div>
+        </div>
+        <!-- Steps -->
+        <div class="px-4 py-3 space-y-2">
+            <div id="mintStep1" class="flex items-center gap-2.5 opacity-30">
+                <div class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-[9px] shrink-0" id="mintStep1Icon">1</div>
+                <div class="flex-1 min-w-0">
+                    <div class="fira text-[11px] text-white">Validating request</div>
+                    <div class="fira text-[9px] text-gray-500" id="mintStep1Detail">Checking balance & supply</div>
+                </div>
+                <span class="fira text-[9px] text-gray-600" id="mintStep1Time"></span>
+            </div>
+            <div id="mintStep2" class="flex items-center gap-2.5 opacity-30">
+                <div class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-[9px] shrink-0" id="mintStep2Icon">2</div>
+                <div class="flex-1 min-w-0">
+                    <div class="fira text-[11px] text-white">Loading metadata</div>
+                    <div class="fira text-[9px] text-gray-500" id="mintStep2Detail">Fetching from IPFS</div>
+                </div>
+                <span class="fira text-[9px] text-gray-600" id="mintStep2Time"></span>
+            </div>
+            <div id="mintStep3" class="flex items-center gap-2.5 opacity-30">
+                <div class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-[9px] shrink-0" id="mintStep3Icon">3</div>
+                <div class="flex-1 min-w-0">
+                    <div class="fira text-[11px] text-white">Creating NFT on-chain</div>
+                    <div class="fira text-[9px] text-gray-500" id="mintStep3Detail">Publishing to KeetaNet</div>
+                </div>
+                <span class="fira text-[9px] text-gray-600" id="mintStep3Time"></span>
+            </div>
+            <div id="mintStep4" class="flex items-center gap-2.5 opacity-30">
+                <div class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-[9px] shrink-0" id="mintStep4Icon">4</div>
+                <div class="flex-1 min-w-0">
+                    <div class="fira text-[11px] text-white">Processing payment</div>
+                    <div class="fira text-[9px] text-gray-500" id="mintStep4Detail">Sending to creator & marketplace</div>
+                </div>
+                <span class="fira text-[9px] text-gray-600" id="mintStep4Time"></span>
+            </div>
+            <div id="mintStep5" class="flex items-center gap-2.5 opacity-30">
+                <div class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-[9px] shrink-0" id="mintStep5Icon">5</div>
+                <div class="flex-1 min-w-0">
+                    <div class="fira text-[11px] text-white">Finalizing</div>
+                    <div class="fira text-[9px] text-gray-500" id="mintStep5Detail">Saving to database</div>
+                </div>
+                <span class="fira text-[9px] text-gray-600" id="mintStep5Time"></span>
+            </div>
+        </div>
+        <!-- Progress bar -->
+        <div class="px-4 pb-3">
+            <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                <div id="mintTrackerProgress" class="h-full bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+        <!-- Result (hidden until complete) -->
+        <div id="mintTrackerResult" class="hidden px-4 pb-3">
+            <div id="mintTrackerResultInner" class="fira text-xs text-center py-2 rounded-lg"></div>
         </div>
     </div>
 </div>
